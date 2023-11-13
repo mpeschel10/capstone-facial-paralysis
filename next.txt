@@ -1,0 +1,24 @@
+uploader client
+    serve a web page (html etc) with a form, upload image
+    nodejs endpoint that can accept an image posted to it
+    save image to /uploads dir
+    automagic account creation, stored in browser
+
+downloader client
+    web app
+        local password
+        display images, click and drag
+    windows desktop
+        auto downloads
+
+encrypted images
+oauth login
+hipaa compliance
+
+clinician user type
+figure out who is allowed to accept users from whom
+    assume one install per institution; any cliniciain is allowed to access any user
+users can delete images; make best-attempt at deletion
+
+dropdown for instutions?
+dropdown only shows up if multiple institutions are sharing the same host
