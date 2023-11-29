@@ -24,7 +24,9 @@ VALUES
 CREATE TABLE sent_files (
     id INT AUTO_INCREMENT,
     url VARCHAR(255),
+    note TEXT,
     user_id INT,
+    date BIGINT,
     CONSTRAINT PRIMARY KEY (id),
     CONSTRAINT FOREIGN KEY (user_id) REFERENCES users (id)
 );
@@ -34,8 +36,8 @@ CREATE TABLE user_aliases (
     user_primary INT,
     user_alias INT,
     CONSTRAINT PRIMARY KEY (id),
-    CONSTRAINT FOREIGN KEY (user_primary), REFERENCES users (id),
-    CONSTRAINT FOREIGN KEY (user_alias), REFERENCES users (id)
+    CONSTRAINT FOREIGN KEY (user_primary) REFERENCES users (id),
+    CONSTRAINT FOREIGN KEY (user_alias) REFERENCES users (id)
 );
 
 SELECT * FROM users;
