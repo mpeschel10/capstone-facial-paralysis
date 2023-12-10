@@ -1,19 +1,13 @@
+# To push changes to the test website,
+#  run upload.py, then ssh into the site and run /tmp/staging/deployment/install.py
+
 import subprocess
 from pathlib import Path
 import os # chdir
 
-# ('relative/path/in/repo', '/absolute/path/on/server')
-file_upload_pairs = [
-	('deployment/facial-analytics-http.conf', '/etc/nginx/sites-available/'),
-	('deployment/facial-analytics.conf', '/etc/nginx/sites-available/'),
-	
-	('fa/index.html', '/var/www/fa/'),
-	
-	# install.py has to be uploaded in order to run it, but it should not be "installed" anywhere.
-	# I guess it's cleaner to say we move it to itself than to put an exception in paths_to_upload?
-	# Idk.
-	('deployment/install.py', 'deployment/install.py'),
-]
+# Note: If you are adding a file to be uploaded,
+#  put it in file_upload_pairs in install.py.
+from install import file_upload_pairs
 
 flags = '-' + ''.join([
 	'R', # Keep relative paths.
@@ -39,7 +33,7 @@ def main():
 	os.chdir(get_repo_dir())
 	
 	paths_to_upload = [source for source, dest in file_upload_pairs]
-	command = ['rsync', flags] + paths_to_upload + ['/home/mpeschel/projects/temp/deploy_test']
+	command = ['rsync', flags] + paths_to_upload + ['fa-test:/tmp/staging/']
 	subprocess.run(command)
 
 if __name__ == '__main__':
