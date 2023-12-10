@@ -7,7 +7,7 @@ import subprocess
 
 # ('relative/path/in/repo', '/absolute/path/on/server')
 file_upload_pairs = [
-	('deployment/facial-analytics-http.conf', '/etc/nginx/sites-available/'),
+	('deployment/facial-analytics-https.conf', '/etc/nginx/sites-available/'),
 	('deployment/facial-analytics.conf', '/etc/nginx/sites-available/'),
 	
 	('fa/index.html', '/var/www/fa/'),
@@ -29,7 +29,7 @@ def main():
 		#  and rename doesn't like that.
 		subprocess.run(['mv', source_path, dest_path])
 	
-	subprocess.run(['ln', '-s', '/etc/nginx/sites-available/facial-analytics-http.conf', '/etc/nginx/sites-enabled/'])
+	subprocess.run(['ln', '-s', '/etc/nginx/sites-available/facial-analytics-https.conf', '/etc/nginx/sites-enabled/'])
 
 if __name__ == '__main__':
 	main()
