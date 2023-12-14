@@ -16,7 +16,7 @@ def main():
 		# ['nginx', '-s', 'reload'],
 
 		# ['systemctl', 'enable', 'fa-test-server', '--now'],
-		# ['systemctl', 'restart', 'fa-test-server'],
+		['systemctl', 'restart', 'fa-test-server'],
 	]
 
 	for command in commands:

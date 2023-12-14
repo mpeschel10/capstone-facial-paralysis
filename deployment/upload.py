@@ -23,9 +23,14 @@ file_upload_pairs = [
 
 UPLOAD_URI = 'fa-test'
 
-flags = '-' + ''.join([
-	'av',
+short_flags = '-' + ''.join([
+	'a', # Archive: Recursive, preserve relative paths and permissions, misc. other stuff.
+	'v', # Verbose: Print to you, the viewer, what is being done.
 ])
+
+long_flags = [
+	'--delete', # If we delete something here, also delete it on the server.
+]
 
 def get_repo_dir():
 	'''
@@ -45,7 +50,8 @@ def main():
 	os.chdir(get_repo_dir())
 	
 	for source, dest in file_upload_pairs:
-		command = ['rsync', flags, source, UPLOAD_URI + ':' + dest]
+		command = ['rsync', short_flags] + long_flags + [source, UPLOAD_URI + ':' + dest]
+		print('Running command', ' '.join(command))
 		subprocess.run(command)
 	
 	subprocess.run(['ssh', UPLOAD_URI, 'python3', '/tmp/staging/install.py'])
