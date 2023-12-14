@@ -1,18 +1,30 @@
-# To push changes to the test website,
-#  run upload.py, then ssh into the site and run /tmp/staging/deployment/install.py
+# To push changes to the test website run python upload.py.
 
 import subprocess
 from pathlib import Path
 import os # chdir
 
-# Note: If you are adding a file to be uploaded,
-#  put it in file_upload_pairs in install.py.
-from install import file_upload_pairs
+# ('relative/path/in/repo', '/absolute/path/on/server')
+file_upload_pairs = [
+	('deployment/facial-analytics-https.conf', '/etc/nginx/sites-available/'),
+	('deployment/facial-analytics.conf', '/etc/nginx/sites-available/'),
+
+	('deployment/fa-test-server.service', '/etc/systemd/system/'),
+	
+	('deployment/install.py', '/tmp/staging/'),
+
+	('app', '/opt/fa-test/'),
+	('node_modules', '/opt/fa-test/'),
+	('public', '/opt/fa-test/'),
+	('next.config.js', '/opt/fa-test/'),
+	('package-lock.json', '/opt/fa-test/'),
+	('package.json', '/opt/fa-test/'),
+]
+
+UPLOAD_URI = 'fa-test'
 
 flags = '-' + ''.join([
-	'R', # Keep relative paths.
-	# Otherwise, rsync dumps all the files in the same directory,
-	#  and if we have index.html and users/index.html they would clobber each other.
+	'av',
 ])
 
 def get_repo_dir():
@@ -32,9 +44,12 @@ def main():
 	# Temporarily move to repo root since all our paths are relative to it.
 	os.chdir(get_repo_dir())
 	
-	paths_to_upload = [source for source, dest in file_upload_pairs]
-	command = ['rsync', flags] + paths_to_upload + ['fa-test:/tmp/staging/']
-	subprocess.run(command)
+	for source, dest in file_upload_pairs:
+		command = ['rsync', flags, source, UPLOAD_URI + ':' + dest]
+		subprocess.run(command)
+	
+	subprocess.run(['ssh', UPLOAD_URI, 'python3', '/tmp/staging/install.py'])
+	print('Upload script done.')
 
 if __name__ == '__main__':
 	main()

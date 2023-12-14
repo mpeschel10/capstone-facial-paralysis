@@ -1,0 +1,12 @@
+[Unit]
+Description=Node server for development to analyse face pictures.
+
+[Service]
+WorkingDirectory=/opt/fa-test/
+ExecStart=npm run dev
+
+# This section determines what happens when you do `systemctl enable fa-test-server`.
+[Install]
+# WantedBy means at what point in the boot process should the server start up.
+# multi-user.target is the last point as far as I'm aware.
+WantedBy=multi-user.target

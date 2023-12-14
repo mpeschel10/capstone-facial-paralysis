@@ -1,0 +1,91 @@
+To run upload.py, you will need the following ssh config:
+
+Host fa-test
+    HostName test.fa.mpeschel10.com
+    User root
+    IdentityFile ~/.ssh/root@test.fa.mpeschel10.com
+    ControlMaster auto
+    ControlPersist 600
+    ControlPath ~/.ssh/control:%h:%p:%r
+
+Paste it in your ~/.ssh/config file on Linux.
+To get an IdentityFile, please contact msp5393@psu.edu
+
+
+
+I use nginx to handle the tls stuff. You need to run
+    nginx -t && nginx -s reload
+in order for changes to any of the *.conf files in deployment to take effect.
+When nginx gets a request, it does the tls, then proxy_passes to localhost:3000.
+I have a "service" set up for doing npm run dev to start the next.js server;
+start it by running
+    systemctl start fa-test-server
+Stop it by running
+    systemctl stop fa-test-server
+To make it run when the system reboots, do
+    systemctl enable fa-test-server
+and to prevent it from running automatically on reboot, do
+    systemctl disable fa-test-server
+
+
+
+
+
+
+
+
+next.js needs more recent node than the node 18 that comes with Debian 12. I installed node 20 with the following instructions:
+https://github.com/nodesource/distributions#debian-and-ubuntu-based-distributions
+
+Transcribed here:
+### Installation Instructions
+
+#### **Node.js**
+
+> _If you have root access, you can omit the 'sudo' command as you already have full administrative privileges._
+
+1. Download and import the Nodesource GPG key
+
+```sh
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+```
+
+2. Create deb repository
+
+```sh
+NODE_MAJOR=20
+echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+```
+
+> ***Optional***: ``NODE_MAJOR`` can be changed depending on the version you need.
+>
+> ```sh
+> NODE_MAJOR=16
+> NODE_MAJOR=18
+> NODE_MAJOR=20
+> NODE_MAJOR=21
+> ```
+
+3. Run Update and Install
+
+```sh
+sudo apt-get update
+sudo apt-get install nodejs -y
+```
+
+### Uninstall `nodejs` Ubuntu & Debian packages
+
+To completely remove Node.js installed from the deb.nodesource.com package methods above:
+
+##### use `sudo` on Ubuntu or run this as root on debian
+
+```sh
+apt-get purge nodejs &&\
+rm -r /etc/apt/sources.list.d/nodesource.list &&\
+rm -r /etc/apt/keyrings/nodesource.gpg
+```
+
+
