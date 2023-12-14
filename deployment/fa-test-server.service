@@ -3,7 +3,7 @@ Description=Node server for development to analyse face pictures.
 
 [Service]
 WorkingDirectory=/opt/fa-test/
-ExecStart=npm run dev
+ExecStart=npm run start
 
 # This section determines what happens when you do `systemctl enable fa-test-server`.
 [Install]

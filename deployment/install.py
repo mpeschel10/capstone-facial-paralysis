@@ -1,8 +1,8 @@
 # After running upload.py,
 #  install.py is to be run from /tmp/staging/ on the server at test.fa.mpeschel10.com
 
+import os, subprocess
 from pathlib import Path
-import subprocess
 
 def main():
 	commands = [
@@ -15,10 +15,13 @@ def main():
 		# ['systemctl', 'enable', 'nginx', '--now'],
 		# ['nginx', '-s', 'reload'],
 
+		['systemctl', 'daemon-reload'],
 		# ['systemctl', 'enable', 'fa-test-server', '--now'],
+		['npm', 'run', 'build'],
 		['systemctl', 'restart', 'fa-test-server'],
 	]
 
+	os.chdir('/opt/fa-test/')
 	for command in commands:
 		subprocess.run(command)
 	
