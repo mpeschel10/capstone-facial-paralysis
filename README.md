@@ -5,15 +5,17 @@ Server for sending images of patient faces to clinicians for machine learning an
 **Group members:** Joshua Carson, Joshua Miranda, Mark Peschel\
 **Sponsors:** Jessyka Lighthall MD, Hanel Eberly BS, Bao Sciscent BS\
 **Faculty advisor:** Hien Nguyen MD\
-**Intended technologies:** React + Express (Node.js) + MySQL
+**Intended technologies:** Next.js + Node.js + MySQL + Debian Linux
 
 #### Problem statement:
-It is sometimes hard to judge the prognosis of facial paralysis from a single clinical visit since facial paralysis tends to change slowly over time. Also, patients may experience events in between clinical visits, and if the patient doesn't take a picture of the event, they have to describe it from memory to the clinician maybe several weeks later.\
-One solution is for patients to take pictures of their faces at regular intervals in various expressions, then for a clinician to measure the face for symmetry, height between pupil and eyelid, and so on. However, the lack of concrete feedback may discourage patients from committing to it, and if a patient having an event is not in the habit of taking photographs, they may not think to take one.
+Patients with facial paralysis may experience events in between clinical visits, and if the patient doesn't take a picture of the event, they have to describe it from memory to the clinician maybe several weeks later.\
+One solution is for patients to take pictures of their faces at regular intervals in various expressions, then for a clinician to later measure the face for symmetry, height between pupil and eyelid, and so on. However, patients often take pictures at various angles and lighting conditions, and the lack of immediate feedback may discourage patients from taking regular pictures, and if a patient having an event is not in the habit of taking photographs, they may not think to take one.
 
-This Facial Analytics platform is intended to solve two problems.\
+This Facial Analytics platform will provide the following benefits.\
 First, it will provide a convenient platform for patients to share their current status with their clinicians. If a patient is experiencing weakness or tension in a specific muscle, they can show that in the picture, which may guide treatment later.\
-Second, it will eventually link up with a machine learning platform that will automatically grade the patient's facial paralysis outcomes. This will provide concrete feedback to the patient, which can be reassuring.
+Second, it will allow clinicians to accept pictures from patients in real time without directly giving out their phone numbers or personal contact information.\
+Third, it will encourage patients to take centered pictures consistent with those taken in the office.\
+Fourth, it will eventually link up with a machine learning platform that will automatically grade the patient's facial paralysis outcomes.
 
 ## Documentation
 
