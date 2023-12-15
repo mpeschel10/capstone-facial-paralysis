@@ -1,3 +1,5 @@
+public/uploads/*
+
 # Python stuff
 __pycache__
 

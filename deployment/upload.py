@@ -19,6 +19,7 @@ file_upload_pairs = [
 	('next.config.js', '/opt/fa-test/'),
 	('package-lock.json', '/opt/fa-test/'),
 	('package.json', '/opt/fa-test/'),
+	('lib', '/opt/fa-test/'),
 ]
 
 UPLOAD_URI = 'fa-test'
