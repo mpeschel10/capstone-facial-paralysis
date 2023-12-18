@@ -1,4 +1,4 @@
-import logging, os, time, signal, subprocess
+import argparse, logging, os, time, signal, subprocess
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
@@ -78,10 +78,17 @@ if __name__ == '__main__':
     # Feel free to add Windows stuff as necessary.
 
     os.chdir(repo_dir)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--make_server', action='store_true')
+    args = parser.parse_args()
     
-    # Launch the server in a new window, for neatness.
-    # launch_server.sh will server the PID in a test/run/server_pid so we can kill it later.
-    p = subprocess.Popen(['gnome-terminal', '--', test_dir.joinpath('launch_server.sh')])
+    if args.make_server:
+        # Launch the server in a new window, for neatness.
+        # launch_server.sh will server the PID in a test/run/server_pid so we can kill it later.
+        p = subprocess.Popen(['gnome-terminal', '--', test_dir.joinpath('launch_server.sh')])
+    else:
+        p = None
 
     try:
         await_server()
@@ -89,6 +96,7 @@ if __name__ == '__main__':
     except BaseException as e:
         print(e)
     finally:
-        time.sleep(2) # If there's an immediate exception, launc_server.sh will not write pid in time.
-        server_pid = int(server_pid_path.open().read())
-        os.kill(server_pid, signal.SIGTERM)
+        if not p is None:
+            time.sleep(2) # If there's an immediate exception, launc_server.sh will not write pid in time.
+            server_pid = int(server_pid_path.open().read())
+            os.kill(server_pid, signal.SIGTERM)
