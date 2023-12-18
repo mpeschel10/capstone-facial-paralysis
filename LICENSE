@@ -1,7 +1,19 @@
+Unknown License
+
+For: .gitignore, "README next.js.md", next.config.js, app/layout.js, .next, node_modules, */__pycache__, all automatically generated material
+
+
+
 MIT License
 
-Copyright (c) 2023 Josua Carson, Joshua Miranda, Mark Peschel
+For: all material if not otherwise specified
+Copyright (c): 2023 Josua Carson, Joshua Miranda, Mark Peschel
 
+For: deployment/nodesource-install.md
+Copyright (c): 2019 NodeSource LLC
+Via: https://github.com/nodesource/distributions#debian-and-ubuntu-based-distributions
+
+License:
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -19,3 +31,20 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+
+Creative Commons Attribution-Share Alike 4.0 International
+
+For: test/resources/CatInBox.jpg
+Copyright (c): 20 February 2022 "EeviLyN" of Wikimedia commons
+Via: https://commons.wikimedia.org/wiki/File:CatInBox.jpg
+
+For: test/test.py await_server()
+Copyright (c): 19 February 2016 "datashaman" of stackoverflow.com and stackoverflow contributors
+Via: https://stackoverflow.com/questions/15431044/can-i-set-max-retries-for-requests-request/35504626#35504626
+
+License:
+https://creativecommons.org/licenses/by-sa/4.0/
+Reproduced here as licenses/by-sa-4.0
+

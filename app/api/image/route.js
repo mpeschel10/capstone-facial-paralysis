@@ -1,8 +1,5 @@
 import { saveRequest } from '../../../lib/kmulter.js'; // This "relative path stuff" is a little upsetting.
 
-import { writeFile } from 'fs/promises'
-import { NextRequest, NextResponse } from 'next/server'
-
 export const dynamic = 'force-dynamic' // defaults to auto
 // I have no idea what this does --Mark
 
