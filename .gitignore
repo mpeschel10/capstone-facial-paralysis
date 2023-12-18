@@ -1,5 +1,7 @@
 public/uploads/*
 
+test/run
+
 # Python stuff
 __pycache__
 
