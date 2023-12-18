@@ -1,6 +1,6 @@
-import { saveRequest } from '../../../lib/kmulter.js'; // This "relative path stuff" is a little upsetting.
+import { saveRequest } from "../../../lib/kmulter.js"; // This "relative path stuff" is a little upsetting.
 
-export const dynamic = 'force-dynamic' // defaults to auto
+export const dynamic = "force-dynamic" // defaults to auto
 // I have no idea what this does --Mark
 
 const failureResponse = new Response(
@@ -24,8 +24,8 @@ export async function POST(request) {
     let response = failureResponse;
     
     try {
-        const uploadPaths = await saveRequest(request);
-        response = Response.json(uploadPaths, {status: 200});
+        const {fields, paths } = await saveRequest(request);
+        response = Response.json(paths, {status: 200});
     } catch (error) {
         if (error.message === "Missing Content-Type") {
             const messageParts = [
@@ -36,9 +36,10 @@ export async function POST(request) {
             ];
             response = Response.json(messageParts.join("\n"), {status: 400});
         } else {
-            console.log("/api/Unknown error:");
-            console.debug("POST", request.url);
-            console.debug(request);
+            console.error("/api/Unknown error:");
+            console.error("POST", request.url);
+            console.error(request);
+            console.error(error);
             response = failureResponse;
         }
     }

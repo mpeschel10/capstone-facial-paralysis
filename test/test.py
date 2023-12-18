@@ -1,4 +1,5 @@
 import argparse, logging, os, time, signal, subprocess
+import filecmp
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
@@ -49,7 +50,7 @@ def await_server():
     logger.info('Server ready.')
 
 
-def test_POST_api_image():
+def test_api_image():
     s = requests.Session()
     
     # This should fail because it has no body or anything.
@@ -65,10 +66,30 @@ def test_POST_api_image():
     if expected != observed:
         logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
     
+    # This should succeed. The file should appear in /public/uploads/.
+    test_name = 'POST /api/image cat'
+    observed_str = 'response.json()'
+    expected = ['api/image/CatInBox.jpg']
     
+    logger.debug(f'Begin test {test_name}.')
+    image_file = cat_image_path.open('rb')
+    response = s.post(SERVER_URL + '/api/image', files={'CatInBox.jpg': image_file})
+    observed = eval(observed_str)
 
-def test_GET_api_image_name():
-    pass
+    if expected != observed:
+        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
+    
+    test_name = 'GET /api/image cat check upload'
+    image_url = SERVER_URL + '/' + observed[0].lstrip('/')
+    observed_str = f's.get({repr(image_url)}).content'
+    expected_str = 'cat_image_path.open("rb").read()'
+
+    expected = eval(expected_str)
+    observed = eval(observed_str)
+
+    if expected != observed:
+        logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
+    
 
 def main():
     '''Performs tests on the facial-analysis server. Prints failures to console.
@@ -80,11 +101,11 @@ def main():
 
     clear_uploads()
     
-    for test_method in [test_POST_api_image, test_GET_api_image_name]:
+    for test_method in [test_api_image, ]:
         try:
             test_method()
         except Exception as e:
-            logger.error(f'Ffailure on test method {test_method.__name__}: Got exception {e}')
+            logger.error(f'Failure on test method {test_method.__name__}: Got exception {e}')
     
     logger.info('End of main.')
 
