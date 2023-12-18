@@ -17,6 +17,7 @@ def get_repo_dir():
 repo_dir = get_repo_dir()
 uploads_dir = repo_dir.joinpath('public', 'uploads')
 test_dir = repo_dir.joinpath('test')
+cat_image_path = test_dir.joinpath('resources', 'CatInBox.jpg')
 server_pid_path = test_dir.joinpath('run', 'server_pid')
 
 
@@ -49,7 +50,22 @@ def await_server():
 
 
 def test_POST_api_image():
-    pass
+    s = requests.Session()
+    
+    # This should fail because it has no body or anything.
+    test_name = 'POST /api/image empty'
+    observed_str = 'response.status_code'
+    expected = 400
+    
+    logger.debug(f'Begin test {test_name}.')
+    response = s.post(SERVER_URL + '/api/image')
+    response.json() # Just confirm that it's valid JSON
+    observed = eval(observed_str)
+
+    if expected != observed:
+        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
+    
+    
 
 def test_GET_api_image_name():
     pass
@@ -63,8 +79,12 @@ def main():
     logger.info('Start of main.')
 
     clear_uploads()
-    test_POST_api_image()
-    test_GET_api_image_name()
+    
+    for test_method in [test_POST_api_image, test_GET_api_image_name]:
+        try:
+            test_method()
+        except Exception as e:
+            logger.error(f'Ffailure on test method {test_method.__name__}: Got exception {e}')
     
     logger.info('End of main.')
 
