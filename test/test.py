@@ -92,7 +92,7 @@ def test_api_image():
     
 
 def main():
-    '''Performs tests on the facial-analysis server. Prints failures to console.
+    '''Performs tests on the facial-analytics server. Prints failures to console.
 
     Assumes the server is up and running at port %d.
     ''' % PORT
