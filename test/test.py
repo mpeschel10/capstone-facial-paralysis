@@ -121,14 +121,14 @@ def test_api_db():
     test_name = 'GET /api/user'
     observed_str = 'response.json()'
     expected = [
-        {'id': 1, 'username': 'mpeschel', 'kind': 'ADMIN', 'is_patient': False, 'clinician_id': None},
-        {'id': 2, 'username': 'jcarson', 'kind': 'ADMIN', 'is_patient': False, 'clinician_id': None},
-        {'id': 3, 'username': 'jmiranda', 'kind': 'ADMIN', 'is_patient': False, 'clinician_id': None},
+        {'id': 1, 'username': 'mpeschel', 'kind': 'ADMIN', 'clinician_id': None},
+        {'id': 2, 'username': 'jcarson', 'kind': 'ADMIN', 'clinician_id': None},
+        {'id': 3, 'username': 'jmiranda', 'kind': 'ADMIN', 'clinician_id': None},
         
-        {'id': 4, 'username': 'ghouse', 'kind': 'ADMIN', 'is_patient': False, 'clinician_id': None},
+        {'id': 4, 'username': 'ghouse', 'kind': 'ADMIN', 'clinician_id': None},
         
-        {'id': 5, 'username': 'radler', 'kind': 'USER', 'is_patient': True, 'clinician_id': 5},
-        {'id': 6, 'username': 'rculling', 'kind': 'USER', 'is_patient': True, 'clinician_id': None},
+        {'id': 5, 'username': 'radler', 'kind': 'USER', 'clinician_id': 4},
+        {'id': 6, 'username': 'rculling', 'kind': 'USER', 'clinician_id': None},
     ]
     
     logger.debug(f'Begin test {test_name}.')
@@ -136,11 +136,11 @@ def test_api_db():
     observed = eval(observed_str)
 
     if expected != observed:
-        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
+        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == \n{expected} but got \n{observed}.')
         all_ok = False
     
     if all_ok:
-        logger.info('Test method test_api_image OK')
+        logger.info('Test method test_api_db OK')
     return all_ok
 
 def main():

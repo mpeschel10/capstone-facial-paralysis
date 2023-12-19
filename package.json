@@ -12,7 +12,8 @@
     "busboy": "^1.6.0",
     "next": "14.0.4",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "mysql2": "^3.6.5"
   },
   "devDependencies": {
     "eslint": "^8",
