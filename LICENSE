@@ -2,6 +2,9 @@ Unknown License
 
 For: .gitignore, "README next.js.md", next.config.js, app/layout.js, .next, node_modules, */__pycache__, all automatically generated material
 
+License: 
+Reproduced: 
+
 
 
 MIT License
@@ -13,38 +16,60 @@ For: deployment/nodesource-install.md
 Copyright (c): 2019 NodeSource LLC
 Via: https://github.com/nodesource/distributions#debian-and-ubuntu-based-distributions
 
-License:
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+License: https://choosealicense.com/licenses/mit/
+Reproduced: licenses/mit
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+
+Creative Commons Attribution 2.0 Generic
+
+For: test/resources/badger.jpg
+Copyright (c): 18 May 2021 "caroline legg" of Flickr (see https://www.flickr.com/people/128941223@N02)
+Via: https://commons.wikimedia.org/wiki/File:European_Badger_-_Meles_meles_(51195321848).jpg
+
+License: https://creativecommons.org/licenses/by/2.0/
+Reproduced: licenses/by-2.0
+
+
+
+Creative Commons Attribution-Share Alike 2.0 Generic
+
+For: test/resources/beaver.jpg
+Copyright (c): 4 July 2008 "Steve from washington, dc, usa" of Flickr (dead link https://www.flickr.com/people/31563480@N00)
+Via: https://commons.wikimedia.org/wiki/File:American_Beaver.jpg
+
+License: https://creativecommons.org/licenses/by-sa/2.0/
+Reproduced: licenses/by-sa-2.0
+
+
+
+Creative Commons Attribution-Share Alike 3.0 Unported
+
+For: test/resources/dog.jpg
+Copyright (c): 20 May 2012 "Petruss" of Wikimedia Commons (see https://commons.wikimedia.org/wiki/User:Petruss)
+Via: https://commons.wikimedia.org/wiki/File:Canis_lupus_familiaris_Perro_Mestizo.JPG
+
+License: https://creativecommons.org/licenses/by-sa/3.0/
+Reproduced: licenses/by-sa-3.0
 
 
 
 Creative Commons Attribution-Share Alike 4.0 International
 
-For: test/resources/CatInBox.jpg
-Copyright (c): 20 February 2022 "EeviLyN" of Wikimedia commons
+For: test/resources/cat.jpg
+Copyright (c): 20 February 2022 "EeviLyN" of Wikimedia Commons
 Via: https://commons.wikimedia.org/wiki/File:CatInBox.jpg
 
+For: test/resources/owl.jpg
+Copyright (c): 14 September 2019 "Rhododendrites" of Wikimedia Commons (see https://commons.wikimedia.org/wiki/User:Rhododendrites)
+Via: https://commons.wikimedia.org/wiki/File:Eurasian_eagle-owl_(44088).jpg
+
 For: test/test.py await_server()
-Copyright (c): 19 February 2016 "datashaman" of stackoverflow.com and stackoverflow contributors
+Copyright (c): 19 February 2016 "datashaman" of stackoverflow.com and Stack Overflow contributors
 Via: https://stackoverflow.com/questions/15431044/can-i-set-max-retries-for-requests-request/35504626#35504626
 
-License:
-https://creativecommons.org/licenses/by-sa/4.0/
-Reproduced here as licenses/by-sa-4.0
+License: https://creativecommons.org/licenses/by-sa/4.0/
+Reproduced: licenses/by-sa-4.0
+
+
 

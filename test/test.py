@@ -18,7 +18,7 @@ def get_repo_dir():
 repo_dir = get_repo_dir()
 uploads_dir = repo_dir.joinpath('uploads')
 test_dir = repo_dir.joinpath('test')
-cat_image_path = test_dir.joinpath('resources', 'CatInBox.jpg')
+cat_image_path = test_dir.joinpath('resources', 'cat.jpg')
 server_pid_path = test_dir.joinpath('run', 'server_pid')
 
 
@@ -69,11 +69,11 @@ def test_api_image():
     # This should succeed. The file should appear in /public/uploads/.
     test_name = 'POST /api/image cat'
     observed_str = 'response.json()'
-    expected = ['api/image/CatInBox.jpg']
+    expected = ['api/image/cat.jpg']
     
     logger.debug(f'Begin test {test_name}.')
     image_file = cat_image_path.open('rb')
-    response = s.post(SERVER_URL + '/api/image', files={'CatInBox.jpg': image_file})
+    response = s.post(SERVER_URL + '/api/image', files={'cat.jpg': image_file})
     observed = eval(observed_str)
 
     if expected != observed:
