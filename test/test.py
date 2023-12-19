@@ -16,7 +16,7 @@ def get_repo_dir():
     return Path(subprocess.check_output(['git', 'rev-parse', '--show-toplevel']).decode('utf-8').strip())
 
 repo_dir = get_repo_dir()
-uploads_dir = repo_dir.joinpath('public', 'uploads')
+uploads_dir = repo_dir.joinpath('uploads')
 test_dir = repo_dir.joinpath('test')
 cat_image_path = test_dir.joinpath('resources', 'CatInBox.jpg')
 server_pid_path = test_dir.joinpath('run', 'server_pid')
