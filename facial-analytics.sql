@@ -14,15 +14,6 @@ CREATE TABLE user (
     kind SET('ADMIN', 'USER') NOT NULL
 );
 
-INSERT INTO user
-    (username, password, kind)
-VALUES
-    ('mpeschel10', 'password', 'ADMIN'),
-    ('jcarson', 'password', 'ADMIN'),
-    ('jmiranda', 'password', 'ADMIN'),
-    ('anon1', 'password', 'USER')
-;
-
 CREATE TABLE file (
     id INT AUTO_INCREMENT PRIMARY KEY,
     url VARCHAR(255) NOT NULL,
@@ -109,4 +100,3 @@ CREATE TABLE image_group (
     CONSTRAINT FOREIGN KEY (lower_teeth_exposed) REFERENCES file (id)
 );
 
-SELECT * FROM user;
