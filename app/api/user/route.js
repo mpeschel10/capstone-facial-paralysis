@@ -30,8 +30,8 @@ export async function POST(request) {
             response = Response.json(rows.insertId, {status: 200});
         } catch (error) {
             if (error.code === "ER_DUP_ENTRY") {
-                const responseBody = `Error: Duplicate username.\r\nThe username "${username}" is already taken.\r\nPlease choose another.`;
-                response = Response.json(responseBody, {status:400});
+                const responseBody = `Error: Duplicate username\r\nThe username "${username}" is already taken.\r\nPlease choose another.`;
+                response = Response.json(responseBody, {status:409});
             } else {
                 console.error("Unhandled error!");
                 console.log(error.code);
