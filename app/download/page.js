@@ -1,10 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { UPLOADS_DIR } from "@/constants";
+
 export const dynamic = 'force-dynamic' // defaults to auto
 
 export default async function Home() {
-  const uploadNames = await fs.promises.readdir( "public/uploads" );
+  const uploadNames = await fs.promises.readdir( UPLOADS_DIR );
   const imgs = [];
 
   for (const uploadName of uploadNames) {

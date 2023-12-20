@@ -15,7 +15,8 @@ def main():
 		# ['systemctl', 'enable', 'nginx', '--now'],
 		# ['nginx', '-s', 'reload'],
 
-		['mkdir', '-p', '/opt/fa-test/public/uploads'],
+		['rm', '-r', '/opt/fa-test/public/uploads'],
+		['mkdir', '-p', '/opt/fa-test/uploads'],
 		['systemctl', 'daemon-reload'],
 		# ['systemctl', 'enable', 'fa-test-server', '--now'],
 		['npm', 'run', 'build'],
