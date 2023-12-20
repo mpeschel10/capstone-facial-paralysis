@@ -74,7 +74,7 @@ def test_api_image():
     observed_str = 'response.status_code'
     expected = 400
     
-    logger.debug(f'Begin test {test_name}.')
+    logger.debug(f'Begin test {test_name}')
     response = s.post(SERVER_URL + '/api/image')
     response.json() # Just confirm that it's valid JSON
     observed = eval(observed_str)
@@ -83,12 +83,12 @@ def test_api_image():
         logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
         all_ok = False
     
-    # This should succeed. The file should appear in /public/uploads/.
+    # This should succeed. The file should appear in /uploads/.
     test_name = 'POST /api/image cat'
     observed_str = 'response.json()'
     expected = ['api/image/cat.jpg']
     
-    logger.debug(f'Begin test {test_name}.')
+    logger.debug(f'Begin test {test_name}')
     image_file = cat_image_path.open('rb')
     response = s.post(SERVER_URL + '/api/image', files={'cat.jpg': image_file})
     observed = eval(observed_str)
@@ -131,12 +131,44 @@ def test_api_db():
         {'id': 6, 'username': 'rculling', 'kind': 'USER', 'clinician_id': None},
     ]
     
-    logger.debug(f'Begin test {test_name}.')
+    logger.debug(f'Begin test {test_name}')
     response = s.get(SERVER_URL + '/api/user')
     observed = eval(observed_str)
 
     if expected != observed:
         logger.warning(f'Failure on test {test_name}: Expected {observed_str} == \n{expected} but got \n{observed}.')
+        all_ok = False
+    
+    test_name = 'POST /api/user'
+    observed_str = 'response.json()'
+    expected = 7 # Id of created user
+    
+    logger.debug(f'Begin test {test_name}')
+    response = s.post(SERVER_URL + '/api/user', data={
+        'username': 'lwimmel',
+        'password': 'lwimmel_password',
+        'kind': 'USER',
+    })
+    observed = eval(observed_str)
+
+    if expected != observed:
+        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
+        all_ok = False
+    
+    test_name = 'POST /api/user duplicate'
+    observed_str = 'response.json()'
+    expected = 'Error: Duplicate username.\r\nThe username "lwimmel" is already taken.\r\nPlease choose another.'
+    
+    logger.debug(f'Begin test {test_name}')
+    response = s.post(SERVER_URL + '/api/user', data={
+        'username': 'lwimmel',
+        'password': 'lwimmel_password',
+        'kind': 'USER',
+    })
+    observed = eval(observed_str)
+
+    if expected != observed:
+        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
         all_ok = False
     
     if all_ok:
