@@ -1,3 +1,5 @@
+import argon2 from "argon2";
+
 import { pool } from "@/lib/database.js";
 import { parseRequest } from "@/lib/kmulter.js";
 
@@ -23,8 +25,9 @@ export async function POST(request) {
     let response = failureResponse;
     const {username, password, kind} = await parseRequest(request);
     if (username !== undefined && password !== undefined && kind !== undefined) {
+        const hash = await argon2.hash(password);
         const query = 'INSERT INTO user (username, password, kind) VALUES (?, ?, ?)';
-        const query_parameters = [username, password, kind];
+        const query_parameters = [username, hash, kind];
         try {
             const [rows, _] = await pool.promise().execute(query, query_parameters);
             response = Response.json(rows.insertId, {status: 200});

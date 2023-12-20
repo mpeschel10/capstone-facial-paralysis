@@ -157,7 +157,7 @@ def test_api_db():
     
     test_name = 'POST /api/user duplicate'
     observed_str = 'response.json()'
-    expected = 'Error: Duplicate username.\r\nThe username "lwimmel" is already taken.\r\nPlease choose another.'
+    expected = 'Error: Duplicate username\r\nThe username "lwimmel" is already taken.\r\nPlease choose another.'
     
     logger.debug(f'Begin test {test_name}')
     response = s.post(SERVER_URL + '/api/user', data={
