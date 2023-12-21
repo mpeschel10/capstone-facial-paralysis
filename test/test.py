@@ -30,6 +30,8 @@ server_pid_path = test_dir.joinpath('run', 'server_pid')
 import logging
 logger = logging.getLogger('test')
 
+
+
 def subseteq(left, right):
     for lkey, lvalue in left.items():
         if not lkey in right:
@@ -37,6 +39,15 @@ def subseteq(left, right):
         if not lvalue == right[lkey]:
             return False
     return True
+
+
+
+def urlsafe_b64decode_padded(s):
+    return base64.urlsafe_b64decode(s + "=" * ((4 - len(s)) % 4))
+
+def jwtToDict(jwt):
+    json_str = urlsafe_b64decode_padded(jwt.split(".")[1])
+    return json.loads(json_str)
 
 
 
@@ -150,9 +161,6 @@ def test_api_user():
     
     test_name = 'POST /api/user'
     
-    def urlsafe_b64decode_padded(s):
-        return base64.urlsafe_b64decode(s + "=" * ((4 - len(s)) % 4))
-    
     # We expect a JWT (JSON Web Token) which is three b64 strings joined with periods.
     # The first string is metadata for the token (algorithm I guess).
     # The seconds string is what we actually check. Get it by splitting on periods.
@@ -160,7 +168,7 @@ def test_api_user():
 
     # We decode the second string from b64, then from json to get a dict.
     # Along with some other stuff, the dict should have our username and id.
-    observed_str = 'json.loads(urlsafe_b64decode_padded(response.json().split(".")[1]))'
+    observed_str = 'jwtToDict(response.json())'
     expected = { 'user_id':7, 'username':'lwimmel' }
     
     logger.debug(f'Begin test {test_name}')
@@ -195,6 +203,28 @@ def test_api_user():
         logger.info('Test method test_api_user OK')
     return all_ok
 
+def test_api_login():
+    all_ok = True
+    s = requests.Session()
+    
+    test_name = 'POST /api/login missing parameter'
+    observed_str = 'response.json()'
+    expected = "ERROR Something something\r\n"
+    
+    logger.debug(f'Begin test {test_name}')
+    response = s.post(SERVER_URL + '/api/login', data={
+        'username': 'mpeschel',
+    })
+    observed = eval(observed_str)
+
+    if observed == expected:
+        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
+        all_ok = False
+    
+    if all_ok:
+        logger.info('Test method test_api_user OK')
+    return all_ok
+
 def main():
     '''Performs tests on the facial-analytics server. Prints failures to console.
 
@@ -207,7 +237,7 @@ def main():
     reset_db()
     
     all_ok = True
-    for test_method in [test_api_image, test_api_user]:
+    for test_method in [test_api_image, test_api_user, test_api_login]:
         try:
             all_ok = all_ok and test_method()
         except Exception as e:
