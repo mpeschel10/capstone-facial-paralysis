@@ -1,5 +1,6 @@
-import argparse, logging, os, time, signal, subprocess
-import filecmp
+import argparse, os, time, signal, subprocess
+import logging, traceback
+import base64, json
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
@@ -28,6 +29,14 @@ server_pid_path = test_dir.joinpath('run', 'server_pid')
 
 import logging
 logger = logging.getLogger('test')
+
+def subseteq(left, right):
+    for lkey, lvalue in left.items():
+        if not lkey in right:
+            return False
+        if not lvalue == right[lkey]:
+            return False
+    return True
 
 
 
@@ -114,7 +123,7 @@ def test_api_image():
     
     return all_ok
 
-def test_api_db():
+def test_api_user():
     all_ok = True
     s = requests.Session()
     
@@ -140,8 +149,19 @@ def test_api_db():
         all_ok = False
     
     test_name = 'POST /api/user'
-    observed_str = 'response.json()'
-    expected = 7 # Id of created user
+    
+    def urlsafe_b64decode_padded(s):
+        return base64.urlsafe_b64decode(s + "=" * ((4 - len(s)) % 4))
+    
+    # We expect a JWT (JSON Web Token) which is three b64 strings joined with periods.
+    # The first string is metadata for the token (algorithm I guess).
+    # The seconds string is what we actually check. Get it by splitting on periods.
+    # The third string is the salted hash, which the server uses as a signature.
+
+    # We decode the second string from b64, then from json to get a dict.
+    # Along with some other stuff, the dict should have our username and id.
+    observed_str = 'json.loads(urlsafe_b64decode_padded(response.json().split(".")[1]))'
+    expected = { 'user_id':7, 'username':'lwimmel' }
     
     logger.debug(f'Begin test {test_name}')
     response = s.post(SERVER_URL + '/api/user', data={
@@ -151,7 +171,7 @@ def test_api_db():
     })
     observed = eval(observed_str)
 
-    if expected != observed:
+    if not subseteq(expected, observed):
         logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
         all_ok = False
     
@@ -172,7 +192,7 @@ def test_api_db():
         all_ok = False
     
     if all_ok:
-        logger.info('Test method test_api_db OK')
+        logger.info('Test method test_api_user OK')
     return all_ok
 
 def main():
@@ -187,11 +207,12 @@ def main():
     reset_db()
     
     all_ok = True
-    for test_method in [test_api_image, test_api_db]:
+    for test_method in [test_api_image, test_api_user]:
         try:
             all_ok = all_ok and test_method()
         except Exception as e:
             logger.error(f'Failure on test method {test_method.__name__}: Got exception {e}')
+            print(traceback.format_exc())
             all_ok = False
 
     logger.debug('End of main.')
@@ -200,7 +221,7 @@ def main():
 
 
 if __name__ == '__main__':
-    # At the moment, I've only implemented tests that work on my specific Arch machine.
+    # At the moment, the server creation stuff only works on my specific Arch machine.
     # Feel free to add Windows stuff as necessary.
 
     os.chdir(repo_dir)

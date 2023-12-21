@@ -1,4 +1,5 @@
 import argon2 from "argon2";
+import jwt from "jsonwebtoken";
 
 import { pool } from "@/lib/database.js";
 import { parseRequest } from "@/lib/kmulter.js";
@@ -30,7 +31,16 @@ export async function POST(request) {
         const query_parameters = [username, hash, kind];
         try {
             const [rows, _] = await pool.promise().execute(query, query_parameters);
-            response = Response.json(rows.insertId, {status: 200});
+            const token = jwt.sign(
+                {user_id: rows.insertId, username},
+                process.env.FA_TEST_JWT_SECRET,
+                {
+                    algorithm: "HS256",
+                    expiresIn: "2h",
+                }
+            );
+
+            response = Response.json(token, {status: 200});
         } catch (error) {
             if (error.code === "ER_DUP_ENTRY") {
                 const responseBody = `Error: Duplicate username\r\nThe username "${username}" is already taken.\r\nPlease choose another.`;
