@@ -1,15 +1,15 @@
 INSERT INTO user
     (username, password, kind)
 VALUES
-    -- Note: For testing purposes, all passwords are of the form `password_${username}`
-    ('mpeschel', '$argon2i$v=19$m=4096,t=3,p=1$JeRjKSUzcA98LFpg+swBRw$0Dk/r+JHIOuacj4nlyo1srgy2y7N78GOt1/xoo3gewk', 'ADMIN'),
-    ('jcarson', '$argon2i$v=19$m=4096,t=3,p=1$hNX7UHhF6tb4kYCxeg4SDQ$ZrdD/f8nqrt7ieirLTMnlTFK+qPkraJnwBcakTVPVuw', 'ADMIN'),
-    ('jmiranda', '$argon2i$v=19$m=4096,t=3,p=1$W9oXqyj2M57SA+waB20qOQ$zJ+5pMFtHAiyGyVA4cN62GI/qQrhCovXWlCGmOq0WEU', 'ADMIN'),
+    -- Note: For testing purposes, all passwords are of the form `${username}_password`
+    ('mpeschel', '$argon2i$v=19$m=4096,t=3,p=1$NHw/0ZeoRZO5GwggL21mgg$+oXcnUw4TMxLAT6rPTlC3oiAWkD0Co64g/ZEUB4B/eQ', 'ADMIN'),
+    ('jcarson', '$argon2i$v=19$m=4096,t=3,p=1$u6r+MEs7iQLedI1yCxyRVw$pTXhegqH2h6h+SizPv2g+XX88P+rzI/L0uEO4/bV4u0', 'ADMIN'),
+    ('jmiranda', '$argon2i$v=19$m=4096,t=3,p=1$HFnkzewbwRniD1URIht5Pg$g/1yi0iLc7Hnn27iruEsk23YCyrPr96D1IU0cMUFwMA', 'ADMIN'),
     
-    ('ghouse', '$argon2i$v=19$m=4096,t=3,p=1$8WMVTQQGWNPi1N22B1TI7Q$AV9Qo/3Savj7X9vRSNCoEEC1vFr4fb0DJ1WGNUpn1Pw', 'ADMIN'),
+    ('ghouse', '$argon2i$v=19$m=4096,t=3,p=1$BBM36GrNXs+iAYYX82+rHA$5OQoQI+ZN7+kEVq+W9JOBH+EtoFtLVTJyZ0rBVxNR8Q', 'ADMIN'),
 
-    ('radler', '$argon2i$v=19$m=4096,t=3,p=1$0msH4hAcnsl+Km64bpITTg$SFVefeDen04DVjAx25wnax2pvQw7xS0xRZngL+t0oak', 'USER'),
-    ('rculling', '$argon2i$v=19$m=4096,t=3,p=1$qPX7GiRcoLYWEdu847kVcg$tQSLg+kD8oqVeUx1qoGeQOHE7tNUZEYBfEGo116/t6o', 'USER')
+    ('radler', '$argon2i$v=19$m=4096,t=3,p=1$rgAnHrvktStdWbm1vXMETg$hSEsUGpgXRElc/ML+Z2UPdx0JDLJ4VRnNHRDE/+OAis', 'USER'),
+    ('rculling', '$argon2i$v=19$m=4096,t=3,p=1$4vZDgpbEsvQ28tjloW77pw$Eg2jXMRakG9KMkTmCwM9mOlITmC+j/dYz3d7ST1fJlE', 'USER')
 ;
 
 

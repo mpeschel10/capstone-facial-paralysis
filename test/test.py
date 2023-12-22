@@ -221,6 +221,37 @@ def test_api_login():
         logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
         all_ok = False
     
+    test_name = 'POST /api/login wrong password'
+    observed_str = 'response.status_code'
+    expected = 403
+    
+    logger.debug(f'Begin test {test_name}')
+    response = s.post(SERVER_URL + '/api/login', data={
+        'username': 'mpeschel',
+        'password': 'mpeschel_password1',
+    })
+    observed = eval(observed_str)
+
+    if expected != observed:
+        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
+        all_ok = False
+    
+    
+    test_name = 'POST /api/login'
+    observed_str = 'jwtToDict(response.json())'
+    expected = { 'user_id':1, 'username':'mpeschel' }
+    
+    logger.debug(f'Begin test {test_name}')
+    response = s.post(SERVER_URL + '/api/login', data={
+        'username': 'mpeschel',
+        'password': 'mpeschel_password',
+    })
+    observed = eval(observed_str)
+
+    if not subseteq(expected, observed):
+        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
+        all_ok = False
+    
     if all_ok:
         logger.info('Test method test_api_user OK')
     return all_ok
