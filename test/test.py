@@ -253,7 +253,7 @@ def test_api_login():
         all_ok = False
     
     if all_ok:
-        logger.info('Test method test_api_user OK')
+        logger.info('Test method test_api_login OK')
     return all_ok
 
 def test_file_visibility():
@@ -273,7 +273,7 @@ def test_file_visibility():
         all_ok = False
     
     if all_ok:
-        logger.info('Test method test_api_user OK')
+        logger.info('Test method test_file_visibility OK')
     return all_ok
 
 def main():
