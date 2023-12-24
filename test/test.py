@@ -85,7 +85,7 @@ def await_server():
     logger.info('Server ready.')
 
 
-def test_api_image():
+def test_api_image_basic():
     all_ok = True
     s = requests.Session()
     
@@ -130,7 +130,7 @@ def test_api_image():
         all_ok = False
     
     if all_ok:
-        logger.info('Test method test_api_image OK')
+        logger.info('Test method test_api_image_basic OK')
     
     return all_ok
 
@@ -256,6 +256,26 @@ def test_api_login():
         logger.info('Test method test_api_user OK')
     return all_ok
 
+def test_file_visibility():
+    all_ok = True
+    s = requests.Session()
+    
+    test_name = 'GET /api/image unauthenticated'
+    observed_str = 'response.status_code'
+    expected = 401
+    
+    logger.debug(f'Begin test {test_name}')
+    response = s.get(SERVER_URL + '/api/image/badger.jpg')
+    observed = eval(observed_str)
+
+    if expected != observed:
+        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
+        all_ok = False
+    
+    if all_ok:
+        logger.info('Test method test_api_user OK')
+    return all_ok
+
 def main():
     '''Performs tests on the facial-analytics server. Prints failures to console.
 
@@ -268,7 +288,7 @@ def main():
     reset_db()
     
     all_ok = True
-    for test_method in [test_api_image, test_api_user, test_api_login]:
+    for test_method in [test_api_image_basic, test_api_user, test_api_login, test_file_visibility]:
         try:
             all_ok = all_ok and test_method()
         except Exception as e:
