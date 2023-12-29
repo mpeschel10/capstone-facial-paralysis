@@ -1,8 +1,8 @@
-import jwt from "jsonwebtoken";
 import argon2 from "argon2";
 
 import { ERROR_RESPONSE } from "@/constants";
 
+import { signUser } from "@/lib/kjwt";
 import { parseRequest } from "@/lib/kmulter";
 import { response400MissingParameter, response403WrongPassword } from "@/lib/responses";
 import { pool } from "@/lib/database";
@@ -20,7 +20,7 @@ export async function POST(request) {
     }
 
     const [[row], _] = await pool.promise().execute(
-        "SELECT id, password FROM user WHERE username = ?",
+        "SELECT id, password, kind FROM user WHERE username = ?",
         [username]
     );
     const expectedHash = row.password;
@@ -32,14 +32,7 @@ export async function POST(request) {
         return response;
     }
     
-    const token = jwt.sign(
-        { user_id: row.id, username },
-        process.env.FA_TEST_JWT_SECRET,
-        {
-            algorithm: "HS256",
-            expiresIn: "2h",
-        }
-    );
+    const token = signUser(row.id, username, row.kind);
     response = Response.json(token, {status:200});
     console.debug("Respond", response.status, Object.fromEntries(response.headers));
     return response;

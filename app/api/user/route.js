@@ -1,8 +1,8 @@
 import argon2 from "argon2";
-import jwt from "jsonwebtoken";
 
-import { pool } from "@/lib/database.js";
-import { parseRequest } from "@/lib/kmulter.js";
+import { signUser } from "@/lib/kjwt";
+import { pool } from "@/lib/database";
+import { parseRequest } from "@/lib/kmulter";
 
 export const dynamic = true;
 
@@ -31,15 +31,7 @@ export async function POST(request) {
         const query_parameters = [username, hash, kind];
         try {
             const [rows, _] = await pool.promise().execute(query, query_parameters);
-            const token = jwt.sign(
-                {user_id: rows.insertId, username},
-                process.env.FA_TEST_JWT_SECRET,
-                {
-                    algorithm: "HS256",
-                    expiresIn: "2h",
-                }
-            );
-
+            const token = signUser(rows.insertId, username, kind);
             response = Response.json(token, {status: 200});
         } catch (error) {
             if (error.code === "ER_DUP_ENTRY") {

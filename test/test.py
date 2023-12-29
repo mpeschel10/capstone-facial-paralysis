@@ -12,16 +12,20 @@ SERVER_URL = 'http://127.0.0.1:%d' % PORT
 
 
 
+import shutil
 from pathlib import Path
 def get_repo_dir():
     return Path(subprocess.check_output(['git', 'rev-parse', '--show-toplevel']).decode('utf-8').strip())
 
 repo_dir = get_repo_dir()
 uploads_dir = repo_dir.joinpath('uploads')
+badger_upload_path = uploads_dir.joinpath('badger.jpg')
+
 db_reset_path = repo_dir.joinpath('facial-analytics.sql')
 
 test_dir = repo_dir.joinpath('test')
 cat_image_path = test_dir.joinpath('resources', 'cat.jpg')
+badger_image_path = test_dir.joinpath('resources', 'badger.jpg')
 db_test_data_path = test_dir.joinpath('resources', 'test.sql')
 server_pid_path = test_dir.joinpath('run', 'server_pid')
 
@@ -54,6 +58,7 @@ def jwtToDict(jwt):
 def reset_uploads():
     for path in uploads_dir.iterdir():
         path.unlink()
+    shutil.copyfile(badger_image_path, badger_upload_path)
 
 def apply_sql(path):
     with path.open('rb') as sql_file:
@@ -66,6 +71,15 @@ def reset_db():
     apply_sql(db_reset_path)
     apply_sql(db_test_data_path)
     logger.info('Reset database OK')
+
+
+def login(session, username, password):
+    jwt_response = session.post(SERVER_URL + '/api/login', data={
+        'username': username,
+        'password': password,
+    })
+    jwt = jwt_response.json()
+    session.headers.update({'Authorization': f'Bearer {jwt}'})
 
 def await_server():
     # From https://stackoverflow.com/a/35504626
@@ -272,6 +286,19 @@ def test_file_visibility():
         logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
         all_ok = False
     
+    test_name = 'GET /api/image admin auth'
+    observed_str = f's.get("{SERVER_URL}/api/image/badger.jpg").content'
+    expected_str = 'badger_image_path.open("rb").read()'
+    
+    logger.debug(f'Begin test {test_name}')
+    login(s, 'mpeschel', 'mpeschel_password')
+    expected = eval(expected_str)
+    observed = eval(observed_str)
+
+    if expected != observed:
+        logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
+        all_ok = False
+    
     if all_ok:
         logger.info('Test method test_file_visibility OK')
     return all_ok
@@ -308,9 +335,9 @@ if __name__ == '__main__':
     os.chdir(repo_dir)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--make_server', action='store_true')
-    parser.add_argument('--dont_close_server', action='store_true')
-    parser.add_argument('--log_level', default='INFO', choices=logging.getLevelNamesMapping().keys())
+    parser.add_argument('--make-server', action='store_true')
+    parser.add_argument('--keep-server', action='store_true')
+    parser.add_argument('--log-level', default='INFO', choices=logging.getLevelNamesMapping().keys())
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.CRITICAL) # Suppress URLLib3 warning about timeouts
@@ -330,7 +357,7 @@ if __name__ == '__main__':
         # print('Exception:', e)
         raise e
     finally:
-        if not p is None and not args.dont_close_server:
+        if not p is None and not args.keep_server:
             time.sleep(2) # If there's an immediate exception, launc_server.sh will not write pid in time.
             server_pid = int(server_pid_path.open().read())
             os.kill(server_pid, signal.SIGTERM)
