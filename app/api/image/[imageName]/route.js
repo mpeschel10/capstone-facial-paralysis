@@ -5,7 +5,7 @@ import jsonwebtoken from "jsonwebtoken";
 import { UPLOADS_DIR } from "@/constants/index.js";
 
 import { pool } from "@/lib/database";
-import { response200File, response401NoToken, response401BadToken } from "@/lib/responses";
+import { response200File, response401NoToken, response401BadToken, response403Forbidden } from "@/lib/responses";
 
 export const dynamic = "force-dynamic" // defaults to auto
 // I have no idea what this does --Mark
@@ -33,7 +33,17 @@ export async function GET(request, paramsWrapper) {
     
     const token = jsonwebtoken.verify(jwt, process.env.FA_TEST_JWT_SECRET);
     if (token.kind !== "ADMIN")
-        return response403Forbidden(`User ${token.username} is not allowed to access ${imageName}`);
+    {
+        const target = new URL(request.url).pathname;
+        const params = [ target, token.user_id ];
+        console.log(params);
+        const [rows, _] = await pool.promise().execute(
+            "SELECT file_visibility.user_id FROM file_visibility JOIN file ON file_visibility.file_id = file.id WHERE file.url = ? AND file_visibility.user_id = ?",
+            params
+        );
+        console.log(rows);
+        if (rows.length === 0) return response403Forbidden(`User ${token.username} is not allowed to access ${target}`);
+    }
     
     return response200File(filePath);
 }

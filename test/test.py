@@ -20,12 +20,19 @@ def get_repo_dir():
 repo_dir = get_repo_dir()
 uploads_dir = repo_dir.joinpath('uploads')
 badger_upload_path = uploads_dir.joinpath('badger.jpg')
+beaver_upload_path = uploads_dir.joinpath('beaver.jpg')
+dog_upload_path = uploads_dir.joinpath('dog.jpg')
+owl_upload_path = uploads_dir.joinpath('owl.jpg')
 
 db_reset_path = repo_dir.joinpath('facial-analytics.sql')
 
 test_dir = repo_dir.joinpath('test')
 cat_image_path = test_dir.joinpath('resources', 'cat.jpg')
 badger_image_path = test_dir.joinpath('resources', 'badger.jpg')
+beaver_image_path = test_dir.joinpath('resources', 'beaver.jpg')
+dog_image_path = test_dir.joinpath('resources', 'dog.jpg')
+owl_image_path = test_dir.joinpath('resources', 'owl.jpg')
+
 db_test_data_path = test_dir.joinpath('resources', 'test.sql')
 server_pid_path = test_dir.joinpath('run', 'server_pid')
 
@@ -59,6 +66,9 @@ def reset_uploads():
     for path in uploads_dir.iterdir():
         path.unlink()
     shutil.copyfile(badger_image_path, badger_upload_path)
+    shutil.copyfile(beaver_image_path, beaver_upload_path)
+    shutil.copyfile(dog_image_path, dog_upload_path)
+    shutil.copyfile(owl_image_path, owl_upload_path)
 
 def apply_sql(path):
     with path.open('rb') as sql_file:
@@ -275,11 +285,10 @@ def test_file_visibility():
     s = requests.Session()
     
     test_name = 'GET /api/image unauthenticated'
-    observed_str = 'response.status_code'
+    observed_str = 's.get(f"{SERVER_URL}/api/image/badger.jpg").status_code'
     expected = 401
     
     logger.debug(f'Begin test {test_name}')
-    response = s.get(SERVER_URL + '/api/image/badger.jpg')
     observed = eval(observed_str)
 
     if expected != observed:
@@ -287,8 +296,8 @@ def test_file_visibility():
         all_ok = False
     
     test_name = 'GET /api/image admin auth'
-    observed_str = f's.get("{SERVER_URL}/api/image/badger.jpg").content'
-    expected_str = 'badger_image_path.open("rb").read()'
+    observed_str = f's.get("{SERVER_URL}/api/image/owl.jpg").content'
+    expected_str = 'owl_image_path.open("rb").read()'
     
     logger.debug(f'Begin test {test_name}')
     login(s, 'mpeschel', 'mpeschel_password')
@@ -297,6 +306,30 @@ def test_file_visibility():
 
     if expected != observed:
         logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
+        all_ok = False
+    
+    test_name = 'GET /api/image owner auth'
+    observed_str = f's.get("{SERVER_URL}/api/image/beaver.jpg").content'
+    expected_str = 'beaver_image_path.open("rb").read()'
+    
+    logger.debug(f'Begin test {test_name}')
+    login(s, 'rculling', 'rculling_password')
+    expected = eval(expected_str)
+    observed = eval(observed_str)
+
+    if expected != observed:
+        logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
+        all_ok = False
+    
+    test_name = 'GET /api/image unauthorized'
+    observed_str = f's.get("{SERVER_URL}/api/image/dog.jpg").status_code'
+    expected = 403
+    
+    logger.debug(f'Begin test {test_name}')
+    observed = eval(observed_str)
+
+    if expected != observed:
+        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
         all_ok = False
     
     if all_ok:

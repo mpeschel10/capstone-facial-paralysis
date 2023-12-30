@@ -2,6 +2,7 @@
 
 DROP TABLE IF EXISTS image_group;
 DROP TABLE IF EXISTS file_of_message;
+DROP TABLE IF EXISTS file_visibility;
 DROP TABLE IF EXISTS message;
 DROP TABLE IF EXISTS patient;
 DROP TABLE IF EXISTS file;
@@ -50,6 +51,13 @@ CREATE TABLE message (
     -- For the time being, delete messages from deleted users.
     -- This may run afoul of data retention polices in the future; idk.
     CONSTRAINT FOREIGN KEY (to_id) REFERENCES user (id) ON DELETE SET NULL
+);
+
+CREATE TABLE file_visibility (
+    file_id INT NOT NULL,
+    user_id INT NOT NULL,
+    CONSTRAINT FOREIGN KEY (file_id) REFERENCES file (id),
+    CONSTRAINT FOREIGN KEY (user_id) REFERENCES user (id)
 );
 
 CREATE TABLE file_of_message (
