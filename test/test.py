@@ -2,6 +2,8 @@ import argparse, os, time, signal, subprocess
 import logging, traceback
 import base64, json
 
+import inspect
+
 import requests
 from requests.adapters import HTTPAdapter, Retry
 
@@ -91,6 +93,9 @@ def login(session, username, password):
     jwt = jwt_response.json()
     session.headers.update({'Authorization': f'Bearer {jwt}'})
 
+def logout(session):
+    session.headers.pop('Authorization', None)
+
 def await_server():
     # From https://stackoverflow.com/a/35504626
     # Begin copyrighted material
@@ -107,6 +112,17 @@ def await_server():
     logger.debug('Awaiting server at %s' % SERVER_URL)
     s.get(SERVER_URL)
     logger.info('Server ready.')
+
+
+def test(test_name, observed_str, expected):
+    logger.debug(f'Begin test {test_name}')
+    context_locals = inspect.currentframe().f_back.f_locals
+    observed = eval(observed_str, None, context_locals)
+
+    if expected != observed:
+        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
+        return False
+    return True
 
 
 def test_api_image_basic():
@@ -153,6 +169,51 @@ def test_api_image_basic():
     if expected != observed:
         logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
         all_ok = False
+    
+    if all_ok:
+        logger.info('Test method test_api_image_basic OK')
+    
+    return all_ok
+
+def test_api_image_get_list():
+    all_ok = True
+    s = requests.Session()
+    
+    all_ok = all_ok and test('GET /api/image unauthorized', 's.get(SERVER_URL + "/api/image").status_code', 401)
+
+    # logout(s) # 401 Unauthorized
+    # login(s, "mpeschel", "mpeschel_password") # admin, cat badger beaver dog owl
+    # login(s, "rculling", "rculling_password") # rculling, beaver owl
+    # login(s, "radler", "radler_password") # radler, dog owl
+
+    # login(s, "mpeschel", "mpeschel_password")
+
+    # ##########
+    # test_name = 'POST /api/image empty'
+    # observed_str = 'response.status_code'
+    # expected = 400
+    
+    # logger.debug(f'Begin test {test_name}')
+    # response = s.post(SERVER_URL + '/api/image')
+    # response.json() # Just confirm that it's valid JSON
+    # observed = eval(observed_str)
+
+    # if expected != observed:
+    #     logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
+    #     all_ok = False
+    # ###########
+
+    # test_name = 'GET /api/image cat check upload'
+    # image_url = SERVER_URL + '/' + observed[0].lstrip('/')
+    # observed_str = f's.get({repr(image_url)}).content'
+    # expected_str = 'cat_image_path.open("rb").read()'
+
+    # expected = eval(expected_str)
+    # observed = eval(observed_str)
+
+    # if expected != observed:
+    #     logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
+    #     all_ok = False
     
     if all_ok:
         logger.info('Test method test_api_image_basic OK')
@@ -337,11 +398,17 @@ def test_file_visibility():
         logger.info('Test method test_file_visibility OK')
     return all_ok
 
-def main():
+def main(test_methods=None):
     '''Performs tests on the facial-analytics server. Prints failures to console.
 
     Assumes the server is up and running at port %d.
     ''' % PORT
+
+    if test_methods == None:
+        def __f(): pass
+        function = type(__f)
+        globals = inspect.currentframe().f_globals
+        test_methods = [value for key, value in globals.items() if key.startswith("test_") and type(value) == function]
     
     logger.debug('Start of main.')
 
@@ -349,7 +416,7 @@ def main():
     reset_db()
     
     all_ok = True
-    for test_method in [test_api_user, test_api_login, test_api_image_basic, test_file_visibility]:
+    for test_method in test_methods:
         try:
             all_ok = all_ok and test_method()
         except Exception as e:
@@ -386,12 +453,12 @@ if __name__ == '__main__':
 
     try:
         await_server()
-        main()
+        main(None)
     except BaseException as e:
         # print('Exception:', e)
         raise e
     finally:
         if not p is None and not args.keep_server:
-            time.sleep(2) # If there's an immediate exception, launc_server.sh will not write pid in time.
+            time.sleep(2) # If there's an immediate exception, launch_server.sh will not write pid in time.
             server_pid = int(server_pid_path.open().read())
             os.kill(server_pid, signal.SIGTERM)

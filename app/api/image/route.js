@@ -9,27 +9,34 @@ export const dynamic = "force-dynamic" // defaults to auto
 // I have no idea what this does --Mark
 
 
+function verifyToken(request) {
+    const authHeader = request.headers.get("Authorization");
+    if (authHeader === null) return [response401NoToken(), null];
+
+    const jwt = chompLeft(authHeader, "Bearer ");
+    if (jwt === null) return [response401BadToken(authHeader, "Bearer ${jwt}"), null]
+
+    const token = jsonwebtoken.verify(jwt, process.env.FA_TEST_JWT_SECRET);
+    return [null, token];
+}
+
 export async function GET(request) {
     console.debug("GET", request.url);
     
-    const response = new Response(null, {
-        status: 501, // Method not implemented.
-    });
+    const [errorResponse, token] = verifyToken(request);
+    if (errorResponse !== null) return errorResponse;
 
-    console.debug("Respond:", response.status, response.body);
-    return response;
+
+
+    // console.debug("Respond:", response.status, response.body);
+    return ERROR_RESPONSE;
 }
 
 export async function POST(request) {
     console.debug("POST", request.url);
-
-    const authHeader = request.headers.get("Authorization");
-    if (authHeader === null) return response401NoToken();
-
-    const jwt = chompLeft(authHeader, "Bearer ");
-    if (jwt === null) return response401BadToken(authHeader);
-
-    const token = jsonwebtoken.verify(jwt, process.env.FA_TEST_JWT_SECRET);
+    
+    const [errorResponse, token] = verifyToken(request);
+    if (errorResponse !== null) return errorResponse;
     // At this time, all users are allowed to upload images without limit,
     //  so no further verification of the token is needed.
 
