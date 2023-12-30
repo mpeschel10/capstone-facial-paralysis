@@ -24,12 +24,15 @@ VALUES
 INSERT INTO file_visibility
     (file_id, user_id)
 VALUES
-    (1, 1),
-    (2, 2),
-    (2, 6),
-    (3, 3),
-    (4, 4),
-    (4, 6)
+    -- Owner visibility
+    (1, 1), -- badger, mpeschel
+    (2, 2), -- beaver, jcarson
+    (3, 5), -- dog, radler
+    (4, 5), -- owl, radler
+
+    -- Sharing visibility
+    (2, 6), -- beaver, rculling
+    (4, 6) -- owl, rculling
     
 ;
 

@@ -21,8 +21,11 @@ export async function GET(request) {
         return response200JSON(rows);
     }
 
-    // console.debug("Respond:", response.status, response.body);
-    return ERROR_RESPONSE;
+    const [rows, _] = await pool.promise().execute(
+        "SELECT file.id, file.url FROM file JOIN file_visibility ON file.id = file_visibility.file_id WHERE file_visibility.user_id = ?",
+        [payload.user_id]
+    );
+    return response200JSON(rows);
 }
 
 

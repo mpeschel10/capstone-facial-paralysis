@@ -176,15 +176,26 @@ def test_api_image_get_list():
     all_ok = True
     s = requests.Session()
 
-    login(s, "mpeschel", "mpeschel_password") # admin, cat badger beaver dog owl
+    login(s, "mpeschel", "mpeschel_password") # cat badger beaver dog owl
     all_ok = all_ok and test(
         'GET /api/image admin',
         's.get(SERVER_URL + "/api/image").json()',
         [{'id': 1, 'url': '/api/image/badger.jpg'}, {'id': 2, 'url': '/api/image/beaver.jpg'}, {'id': 3, 'url': '/api/image/dog.jpg'}, {'id': 4, 'url': '/api/image/owl.jpg'}]
     )
     
-    # login(s, "rculling", "rculling_password") # rculling, beaver owl
-    # login(s, "radler", "radler_password") # radler, dog owl
+    login(s, "rculling", "rculling_password") # beaver owl
+    all_ok = all_ok and test(
+        'GET /api/image rculling beaver owl',
+        's.get(SERVER_URL + "/api/image").json()',
+        [{'id': 2, 'url': '/api/image/beaver.jpg'}, {'id': 4, 'url': '/api/image/owl.jpg'}]
+    )
+    
+    login(s, "radler", "radler_password") # dog owl
+    all_ok = all_ok and test(
+        'GET /api/image radler dog owl',
+        's.get(SERVER_URL + "/api/image").json()',
+        [{'id': 3, 'url': '/api/image/dog.jpg'}, {'id': 4, 'url': '/api/image/owl.jpg'}]
+    )
     
     logout(s) # 401 Unauthorized
     all_ok = all_ok and test('GET /api/image unauthorized', 's.get(SERVER_URL + "/api/image").status_code', 401)
