@@ -27,7 +27,7 @@ export async function POST(request) {
     if (authHeader === null) return response401NoToken();
 
     const jwt = chompLeft(authHeader, "Bearer ");
-    if (jwt === null) return response401BadToken();
+    if (jwt === null) return response401BadToken(authHeader);
 
     const token = jsonwebtoken.verify(jwt, process.env.FA_TEST_JWT_SECRET);
     // At this time, all users are allowed to upload images without limit,
