@@ -113,6 +113,7 @@ def test_api_image_basic():
     all_ok = True
     s = requests.Session()
     
+    login(s, "mpeschel", "mpeschel_password")
     # This should fail because it has no body or anything.
     test_name = 'POST /api/image empty'
     observed_str = 'response.status_code'
@@ -348,7 +349,7 @@ def main():
     reset_db()
     
     all_ok = True
-    for test_method in [test_api_image_basic, test_api_user, test_api_login, test_file_visibility]:
+    for test_method in [test_api_user, test_api_login, test_api_image_basic, test_file_visibility]:
         try:
             all_ok = all_ok and test_method()
         except Exception as e:

@@ -1,11 +1,12 @@
+import { ERROR_RESPONSE } from "@/constants/index.js";
+
+import { response401BadToken, response401NoToken } from "@/lib/responses.js";
 import { saveRequest } from "../../../lib/kmulter.js"; // This "relative path stuff" is a little upsetting.
+import { chompLeft } from "@/lib/utils.js";
 
 export const dynamic = "force-dynamic" // defaults to auto
 // I have no idea what this does --Mark
 
-const failureResponse = new Response(
-    null, { status: 500, }
-);
 
 export async function GET(request) {
     console.debug("GET", request.url);
@@ -21,7 +22,13 @@ export async function GET(request) {
 export async function POST(request) {
     console.debug("POST", request.url);
 
-    let response = failureResponse;
+    const authHeader = request.headers.get("Authorization");
+    if (authHeader === null) return response401NoToken();
+
+    const jwt = chompLeft(authHeader, "Bearer ");
+    if (jwt === null) return response401BadToken();
+
+    let response = ERROR_RESPONSE;
     
     try {
         const {fields, paths } = await saveRequest(request);
@@ -40,7 +47,6 @@ export async function POST(request) {
             console.error("POST", request.url);
             console.error(request);
             console.error(error);
-            response = failureResponse;
         }
     }
     

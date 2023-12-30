@@ -6,14 +6,10 @@ import { UPLOADS_DIR } from "@/constants/index.js";
 
 import { pool } from "@/lib/database";
 import { response200File, response401NoToken, response401BadToken, response403Forbidden } from "@/lib/responses";
+import { chompLeft } from "@/lib/utils";
 
 export const dynamic = "force-dynamic" // defaults to auto
 // I have no idea what this does --Mark
-
-function chompLeft(s, format) {
-    if (!s.startsWith(format)) return null;
-    return s.substring(format.length);
-}
 
 export async function GET(request, paramsWrapper) {
     const {params} = paramsWrapper;
