@@ -1,5 +1,3 @@
-import jsonwebtoken from "jsonwebtoken";
-
 import { requestToPayload } from "@/lib/kjwt.js";
 import { ERROR_RESPONSE } from "@/constants/index.js";
 import { saveRequest } from "@/lib/kmulter.js";
