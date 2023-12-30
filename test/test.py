@@ -170,54 +170,25 @@ def test_api_image_basic():
         logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
         all_ok = False
     
-    if all_ok:
-        logger.info('Test method test_api_image_basic OK')
-    
     return all_ok
 
 def test_api_image_get_list():
     all_ok = True
     s = requests.Session()
-    
-    all_ok = all_ok and test('GET /api/image unauthorized', 's.get(SERVER_URL + "/api/image").status_code', 401)
 
-    # logout(s) # 401 Unauthorized
-    # login(s, "mpeschel", "mpeschel_password") # admin, cat badger beaver dog owl
+    login(s, "mpeschel", "mpeschel_password") # admin, cat badger beaver dog owl
+    all_ok = all_ok and test(
+        'GET /api/image admin',
+        's.get(SERVER_URL + "/api/image").json()',
+        [{'id': 1, 'url': '/api/image/badger.jpg'}, {'id': 2, 'url': '/api/image/beaver.jpg'}, {'id': 3, 'url': '/api/image/dog.jpg'}, {'id': 4, 'url': '/api/image/owl.jpg'}]
+    )
+    
     # login(s, "rculling", "rculling_password") # rculling, beaver owl
     # login(s, "radler", "radler_password") # radler, dog owl
-
-    # login(s, "mpeschel", "mpeschel_password")
-
-    # ##########
-    # test_name = 'POST /api/image empty'
-    # observed_str = 'response.status_code'
-    # expected = 400
     
-    # logger.debug(f'Begin test {test_name}')
-    # response = s.post(SERVER_URL + '/api/image')
-    # response.json() # Just confirm that it's valid JSON
-    # observed = eval(observed_str)
+    logout(s) # 401 Unauthorized
+    all_ok = all_ok and test('GET /api/image unauthorized', 's.get(SERVER_URL + "/api/image").status_code', 401)
 
-    # if expected != observed:
-    #     logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
-    #     all_ok = False
-    # ###########
-
-    # test_name = 'GET /api/image cat check upload'
-    # image_url = SERVER_URL + '/' + observed[0].lstrip('/')
-    # observed_str = f's.get({repr(image_url)}).content'
-    # expected_str = 'cat_image_path.open("rb").read()'
-
-    # expected = eval(expected_str)
-    # observed = eval(observed_str)
-
-    # if expected != observed:
-    #     logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
-    #     all_ok = False
-    
-    if all_ok:
-        logger.info('Test method test_api_image_basic OK')
-    
     return all_ok
 
 def test_api_user():
@@ -285,8 +256,6 @@ def test_api_user():
         logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
         all_ok = False
     
-    if all_ok:
-        logger.info('Test method test_api_user OK')
     return all_ok
 
 def test_api_login():
@@ -338,8 +307,6 @@ def test_api_login():
         logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
         all_ok = False
     
-    if all_ok:
-        logger.info('Test method test_api_login OK')
     return all_ok
 
 def test_file_visibility():
@@ -394,8 +361,6 @@ def test_file_visibility():
         logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
         all_ok = False
     
-    if all_ok:
-        logger.info('Test method test_file_visibility OK')
     return all_ok
 
 def main(test_methods=None):
@@ -418,7 +383,10 @@ def main(test_methods=None):
     all_ok = True
     for test_method in test_methods:
         try:
-            all_ok = all_ok and test_method()
+            result = test_method()
+            if result:
+                logger.info(f'Test method {test_method.__name__} OK')
+            all_ok = all_ok and result
         except Exception as e:
             logger.error(f'Failure on test method {test_method.__name__}: Got exception {e}')
             print(traceback.format_exc())

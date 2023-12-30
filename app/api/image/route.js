@@ -1,6 +1,8 @@
 import { requestToPayload } from "@/lib/kjwt.js";
 import { ERROR_RESPONSE } from "@/constants/index.js";
 import { saveRequest } from "@/lib/kmulter.js";
+import { response200JSON } from "@/lib/responses";
+import { pool } from "@/lib/database";
 
 export const dynamic = "force-dynamic" // defaults to auto
 // I have no idea what this does --Mark
@@ -11,6 +13,13 @@ export async function GET(request) {
     
     const [errorResponse, payload] = requestToPayload(request);
     if (errorResponse !== null) return errorResponse;
+
+    if (payload.kind === "ADMIN") {
+        const [rows, _] = await pool.promise().execute(
+            "SELECT id, url FROM file"
+        );
+        return response200JSON(rows);
+    }
 
     // console.debug("Respond:", response.status, response.body);
     return ERROR_RESPONSE;
@@ -28,7 +37,7 @@ export async function POST(request) {
     let response = ERROR_RESPONSE;
     try {
         const {fields, paths} = await saveRequest(request);
-        response = Response.json(paths, {status: 200});
+        return response200JSON(paths);
     } catch (error) {
         if (error.message === "Missing Content-Type") {
             const messageParts = [
