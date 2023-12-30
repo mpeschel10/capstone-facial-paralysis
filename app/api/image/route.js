@@ -1,5 +1,6 @@
-import { ERROR_RESPONSE } from "@/constants/index.js";
+import jsonwebtoken from "jsonwebtoken";
 
+import { ERROR_RESPONSE } from "@/constants/index.js";
 import { response401BadToken, response401NoToken } from "@/lib/responses.js";
 import { saveRequest } from "../../../lib/kmulter.js"; // This "relative path stuff" is a little upsetting.
 import { chompLeft } from "@/lib/utils.js";
@@ -28,8 +29,11 @@ export async function POST(request) {
     const jwt = chompLeft(authHeader, "Bearer ");
     if (jwt === null) return response401BadToken();
 
+    const token = jsonwebtoken.verify(jwt, process.env.FA_TEST_JWT_SECRET);
+    // At this time, all users are allowed to upload images without limit,
+    //  so no further verification of the token is needed.
+
     let response = ERROR_RESPONSE;
-    
     try {
         const {fields, paths } = await saveRequest(request);
         response = Response.json(paths, {status: 200});
