@@ -4,7 +4,7 @@ import { ERROR_RESPONSE } from "@/constants";
 
 import { signUser } from "@/lib/kjwt";
 import { parseRequest } from "@/lib/kmulter";
-import { response400MissingParameter, response403WrongPassword } from "@/lib/responses";
+import { response200JSON, response400MissingParameter, response401WrongPassword } from "@/lib/responses";
 import { pool } from "@/lib/database";
 
 export async function POST(request) {
@@ -12,28 +12,15 @@ export async function POST(request) {
     let response = ERROR_RESPONSE;
 
     const { username, password } = await parseRequest(request);
-    if ([username, password].some(v => v === undefined)) {
-
-        response = response400MissingParameter({ username, password});
-        console.debug("Respond", response.status, Object.fromEntries(response.headers));
-        return response;
-    }
+    if (username === undefined || password === undefined) return response400MissingParameter({ username, password});
 
     const [[row], _] = await pool.promise().execute(
         "SELECT id, password, kind FROM user WHERE username = ?",
         [username]
     );
     const expectedHash = row.password;
-    console.debug("Comparing ", expectedHash, " with", password)
-    if (!await argon2.verify(expectedHash, password))
-    {
-        response = response403WrongPassword({ username });
-        console.debug("Respond", response.status, Object.fromEntries(response.headers));
-        return response;
-    }
+    if (!await argon2.verify(expectedHash, password)) return response401WrongPassword({ username });
     
     const token = signUser(row.id, username, row.kind);
-    response = Response.json(token, {status:200});
-    console.debug("Respond", response.status, Object.fromEntries(response.headers));
-    return response;
+    return response200JSON(token, {status:200});
 }

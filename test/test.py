@@ -212,7 +212,7 @@ def test_api_login():
     
     test_name = 'POST /api/login wrong password'
     observed_str = 'response.status_code'
-    expected = 403
+    expected = 401
     
     logger.debug(f'Begin test {test_name}')
     response = s.post(SERVER_URL + '/api/login', data={
@@ -293,7 +293,7 @@ def test_api_image():
 def test_api_image_get_list():
     reset_uploads()
     reset_db()
-    
+
     all_ok = True
     s = requests.Session()
 
