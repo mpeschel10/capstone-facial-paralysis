@@ -3,7 +3,7 @@ import path from "node:path";
 import { UPLOADS_DIR } from "@/constants/index.js";
 
 import { pool } from "@/lib/database";
-import { response200File, response401NoToken, response401BadToken, response403Forbidden } from "@/lib/responses";
+import { response200File, response403Forbidden } from "@/lib/responses";
 import { requestToPayload } from "@/lib/kjwt";
 
 export const dynamic = "force-dynamic" // defaults to auto
@@ -16,8 +16,6 @@ export async function GET(request, paramsWrapper) {
     console.log("GET ", request.url);
 
     const filePath = path.join(UPLOADS_DIR, imageName);
-    // TODO: make this debug/testing only.
-    if (imageName === "cat.jpg") return response200File(filePath);
     
     const [errorResponse, payload] = requestToPayload(request);
     if (errorResponse !== null) return errorResponse;

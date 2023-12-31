@@ -1,7 +1,7 @@
 import { requestToPayload } from "@/lib/kjwt.js";
 import { ERROR_RESPONSE } from "@/constants/index.js";
 import { saveRequest } from "@/lib/kmulter.js";
-import { response200JSON } from "@/lib/responses";
+import { response200JSON, response400MissingContentType, response500InternalServerError } from "@/lib/responses";
 import { pool } from "@/lib/database";
 
 export const dynamic = "force-dynamic" // defaults to auto
@@ -37,27 +37,28 @@ export async function POST(request) {
     // At this time, all users are allowed to upload images without limit,
     //  so no further verification of the token is needed.
 
-    let response = ERROR_RESPONSE;
     try {
         const {fields, paths} = await saveRequest(request);
+        for (const path of paths) {
+            const [insertResult, _] = await pool.promise().execute(
+                "INSERT INTO file (url, owner_id) VALUES (?, ?);",
+                ["/" + path, payload.user_id]
+            );
+            await pool.promise().execute(
+                "INSERT INTO file_visibility (file_id, user_id) VALUES (?, ?);",
+                [insertResult.insertId, payload.user_id]
+            );
+        }
         return response200JSON(paths);
     } catch (error) {
         if (error.message === "Missing Content-Type") {
-            const messageParts = [
-                "Error: " + error.message,
-                "The /api/image endpoint expects a multipart/form-data encoded message.",
-                "You must include an appropriate Content-Type header.",
-                "Field name does not matter. You can upload multiple files at a time.",
-            ];
-            response = Response.json(messageParts.join("\n"), {status: 400});
+            return response400MissingContentType("/api/image POST");
         } else {
             console.error("/api/Unknown error:");
             console.error("POST", request.url);
             console.error(request);
             console.error(error);
+            return response500InternalServerError();
         }
     }
-    
-    console.debug("Respond:", response.status, Object.fromEntries(response.headers));
-    return response;
 }
