@@ -1,6 +1,6 @@
 import argparse, os, time, signal, subprocess
 import logging, traceback
-import base64, json
+import base64, datetime, json
 
 import inspect
 
@@ -61,10 +61,13 @@ def subseteq(left, right):
 def urlsafe_b64decode_padded(s):
     return base64.urlsafe_b64decode(s + "=" * ((4 - len(s)) % 4))
 
-def jwtToDict(jwt):
+def jwt_to_dict(jwt):
     json_str = urlsafe_b64decode_padded(jwt.split(".")[1])
     return json.loads(json_str)
 
+def chomp_left(s, prefix):
+    if not s.startswith(prefix): return None
+    return s[len(prefix):]
 
 
 def reset_uploads():
@@ -162,7 +165,7 @@ def test_api_user():
 
     # We decode the second string from b64, then from json to get a dict.
     # Along with some other stuff, the dict should have our username and id.
-    observed_str = 'jwtToDict(response.json())'
+    observed_str = 'jwt_to_dict(response.json())'
     expected = { 'user_id':7, 'username':'lwimmel' }
     
     logger.debug(f'Begin test {test_name}')
@@ -198,7 +201,6 @@ def test_api_user():
 def test_api_login():
     all_ok = True
     s = requests.Session()
-
     url_str = repr(SERVER_URL + "/api/login")
 
     all_ok = all_ok and test(
@@ -215,39 +217,62 @@ def test_api_login():
     )
 
     
-    test_name = 'POST /api/login wrong password'
-    observed_str = 'response.status_code'
-    expected = 401
-    
-    logger.debug(f'Begin test {test_name}')
-    response = s.post(SERVER_URL + '/api/login', data={
+    credentials_str = repr({
         'username': 'mpeschel',
-        'password': 'mpeschel_password1',
+        'password': 'x'
     })
-    observed = eval(observed_str)
-
-    if expected != observed:
-        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
-        all_ok = False
-    
+    all_ok = all_ok and test(
+        'POST /api/login wrong password',
+        f's.post({url_str}, data={credentials_str}).status_code',
+        401,
+    )
     
     
     credentials_str = repr({
         'username': 'mpeschel',
-        'password': 'mpeschel_password',
+        'password': 'mpeschel_password'
     })
+    expected_token_contents = { 'user_id':1, 'username':'mpeschel' }
     all_ok = all_ok and test(
         'POST /api/login creds in body',
-        f'jwtToDict(s.post({url_str}, data={credentials_str}).json())',
-        { 'user_id':1, 'username':'mpeschel' },
+        f'jwt_to_dict(s.post({url_str}, data={credentials_str}).json())',
+        expected_token_contents,
         comparison=subseteq
     )
+
+    def is_cookie_ok(expected, observed):
+        segments = observed.split('; ')
+        if len(segments) != 4: return False
+        key_value, expires_when, secure, http_only = segments
+
+        key, value = key_value.split('=', 1)
+        if key != 'fa-test-session-jwt': return False
+        if not subseteq(expected_token_contents, jwt_to_dict(value)): return False
+
+        when = chomp_left(expires_when, 'Expires ')
+        try:
+            datetime.datetime.strptime(when, '%a, %d %b %Y %H:%M:%S GMT')
+        except ValueError:
+            logging.warn(f'Rejecting cookie {observed} due to time formatting error.')
+            return False
+
+        if secure != 'Secure': secure, http_only = http_only, secure
+        if secure != 'Secure' or http_only != 'HttpOnly': return False
+
+        return True
+
+    all_ok = all_ok and test(
+        'POST /api/login set-cookie',
+        f's.post({url_str}, data={credentials_str}).headers["Set-Cookie"]',
+        'fa-test-session-jwt={hexadecimal stuff}; Expires sometime; Secure; HttpOnly',
+        comparison=is_cookie_ok
+    )
+
     
     credentials_str = repr(('jcarson', 'jcarson_password'))
-    url_str = repr(SERVER_URL + "/api/login")
     all_ok = all_ok and test(
         'POST /api/login creds in Auth header',
-        f'jwtToDict(s.post({url_str}, auth={credentials_str}).json())',
+        f'jwt_to_dict(s.post({url_str}, auth={credentials_str}).json())',
         { 'user_id':2, 'username':'jcarson' },
         comparison=subseteq
     )

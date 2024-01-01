@@ -10,6 +10,7 @@ import {
 } from "@/lib/responses";
 import { pool } from "@/lib/database";
 import { chompLeft } from "@/lib/utils";
+import { verify } from "jsonwebtoken";
 
 async function requestToUsernamePassword(request) {
     const authorizationHeader = request.headers.get("Authorization");
@@ -58,6 +59,11 @@ export async function POST(request) {
     const expectedHash = row.password;
     if (!await argon2.verify(expectedHash, password)) return response401WrongPassword({ username });
     
+    
     const token = signUser(row.id, username, row.kind);
-    return response200JSON(token, {status:200});
+    const expireTime = verify(token, process.env.FA_TEST_JWT_SECRET).exp;
+    const expireString = new Date(expireTime * 1000).toUTCString();
+    const cookie = `fa-test-session-jwt=${token}; Expires ${expireString}; Secure; HttpOnly`;
+    
+    return response200JSON(token, {"Set-Cookie": cookie});
 }
