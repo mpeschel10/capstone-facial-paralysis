@@ -4,7 +4,10 @@ import { ERROR_RESPONSE } from "@/constants";
 
 import { signUser } from "@/lib/kjwt";
 import { parseRequest } from "@/lib/kmulter";
-import { response200JSON, response400MissingParameter, response401BadAuthorization, response401WrongPassword } from "@/lib/responses";
+import {
+    response200JSON, response400Custom, response400MissingParameter,
+    response401BadAuthorization, response401WrongPassword
+} from "@/lib/responses";
 import { pool } from "@/lib/database";
 import { chompLeft } from "@/lib/utils";
 
@@ -20,11 +23,25 @@ async function requestToUsernamePassword(request) {
             return [null, {username, password}];
         }
     }
-    const {username, password} = await parseRequest(request);
-    if (username === undefined || password === undefined) return [
-        response400MissingParameter({ username, password}), null
-    ];
-    return [null, {username, password}];
+    
+    try {
+        const {username, password} = await parseRequest(request);
+        if (username === undefined || password === undefined) return [
+            response400MissingParameter({ username, password}), null
+        ];
+        return [null, {username, password}];
+    } catch (error) {
+        console.error(error.message);
+        if (error.message === "Missing Content-Type") {
+            return [response400Custom(
+                "Error: No arguments\r\n" + 
+                "The /api/login POST endpoint expects a username, password pair.\r\n" +
+                "Either send an Authorization: Basic header, an x-www-form-urlencoded body, or a multipart/form-data encoded body.",
+            ), null];
+        } else {
+            throw error;
+        }
+    }
 }
 
 export async function POST(request) {
