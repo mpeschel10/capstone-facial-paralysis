@@ -45,6 +45,9 @@ logger = logging.getLogger('test')
 
 
 
+def eq(left, right):
+    return left == right
+
 def subseteq(left, right):
     for lkey, lvalue in left.items():
         if not lkey in right:
@@ -114,12 +117,12 @@ def await_server():
     logger.info('Server ready.')
 
 
-def test(test_name, observed_str, expected):
+def test(test_name, observed_str, expected, comparison=eq):
     logger.debug(f'Begin test {test_name}')
     context_locals = inspect.currentframe().f_back.f_locals
     observed = eval(observed_str, None, context_locals)
 
-    if expected != observed:
+    if not comparison(expected, observed):
         logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
         return False
     return True
@@ -226,20 +229,27 @@ def test_api_login():
         all_ok = False
     
     
-    test_name = 'POST /api/login'
-    observed_str = 'jwtToDict(response.json())'
-    expected = { 'user_id':1, 'username':'mpeschel' }
-    
-    logger.debug(f'Begin test {test_name}')
-    response = s.post(SERVER_URL + '/api/login', data={
+    credentials_str = repr({
         'username': 'mpeschel',
         'password': 'mpeschel_password',
     })
-    observed = eval(observed_str)
-
-    if not subseteq(expected, observed):
-        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
-        all_ok = False
+    url_str = repr(SERVER_URL + "/api/login")
+    all_ok = all_ok and test(
+        'POST /api/login creds in body',
+        f'jwtToDict(s.post({url_str}, data={credentials_str}).json())',
+        { 'user_id':1, 'username':'mpeschel' },
+        comparison=subseteq
+    )
+    
+    
+    credentials_str = repr(('jcarson', 'jcarson_password'))
+    url_str = repr(SERVER_URL + "/api/login")
+    all_ok = all_ok and test(
+        'POST /api/login creds in Auth header',
+        f'jwtToDict(s.post({url_str}, auth={credentials_str}).json())',
+        { 'user_id':2, 'username':'jcarson' },
+        comparison=subseteq
+    )
     
     return all_ok
 
