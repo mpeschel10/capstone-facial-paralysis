@@ -92,15 +92,22 @@ def reset_db():
 
 
 def login(session, username, password):
-    jwt_response = session.post(SERVER_URL + '/api/login', data={
+    session.post(SERVER_URL + '/api/login', data={
         'username': username,
         'password': password,
     })
-    jwt = jwt_response.json()
-    session.headers.update({'Authorization': f'Bearer {jwt}'})
+    
+    # For production, the cookies have the HttpOnly attribute, which forbids passing the cookies over Http.
+    # For testing, it's all done over http since I don't wanna bother with self-signed certificates.
+    # This means the jwt cookie will not get passed along,
+    #  so reassign the cookie to discard the HttpOnly attribute.
+    token = session.cookies.get('fa-test-session-jwt', domain='127.0.0.1', path='/')
+    # Discard the old cookie. This must be done as a separate step.
+    session.cookies.set('fa-test-session-jwt', None, domain='127.0.0.1', path='/')
+    session.cookies.set('fa-test-session-jwt', token, domain='127.0.0.1', path='/')
 
 def logout(session):
-    session.headers.pop('Authorization', None)
+    session.cookies.set('fa-test-session-jwt', None, domain='127.0.0.1', path='/')
 
 def await_server():
     # From https://stackoverflow.com/a/35504626
@@ -120,14 +127,25 @@ def await_server():
     logger.info('Server ready.')
 
 
-def test(test_name, observed_str, expected, comparison=eq):
+def test(test_name, observed_str, expected=None, expected_str=None, comparison=eq):
+    if expected == None and expected_str == None:
+        raise Exception(f'Bad test {test_name}; both expected and expected_str are None.')
+    if expected != None and expected_str != None:
+        raise Exception(f'Bad test {test_name}; both expected and expected_str are not None.')
+    
+    
     logger.debug(f'Begin test {test_name}')
     context_locals = inspect.currentframe().f_back.f_locals
+    if expected_str != None:
+        expected = eval(expected_str, None, context_locals)
     observed = eval(observed_str, None, context_locals)
 
     if not comparison(expected, observed):
-        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
-        return False
+        if expected_str is None:
+            logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
+        else:
+            logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
+
     return True
 
 
@@ -242,8 +260,20 @@ def test_api_login():
 
     def is_cookie_ok(expected, observed):
         segments = observed.split('; ')
-        if len(segments) != 4: return False
-        key_value, expires_when, secure, http_only = segments
+        if len(segments) != 5: return False
+        key_value = segments[0]
+        expires_when, secure, http_only, path = None, None, None, None
+        for segment in segments[1:]:
+            if segment.startswith('Expires '):
+                expires_when = segment
+            elif segment == 'Secure':
+                secure = segment
+            elif segment == 'HttpOnly':
+                http_only = segment
+            elif segment == 'Path=/':
+                path = segment
+            else:
+                return False
 
         key, value = key_value.split('=', 1)
         if key != 'fa-test-session-jwt': return False
@@ -264,7 +294,7 @@ def test_api_login():
     all_ok = all_ok and test(
         'POST /api/login set-cookie',
         f's.post({url_str}, data={credentials_str}).headers["Set-Cookie"]',
-        'fa-test-session-jwt={hexadecimal stuff}; Expires sometime; Secure; HttpOnly',
+        'fa-test-session-jwt={hexadecimal stuff}; Expires sometime; Secure; HttpOnly; Path=/',
         comparison=is_cookie_ok
     )
 
@@ -282,48 +312,33 @@ def test_api_login():
 def test_api_image():
     all_ok = True
     s = requests.Session()
+    endpoint_str = repr(SERVER_URL + '/api/image')
     
-    login(s, "radler", "radler_password")
     # This should fail because it has no body or anything.
-    test_name = 'POST /api/image empty'
-    observed_str = 'response.status_code'
-    expected = 400
-    
-    logger.debug(f'Begin test {test_name}')
-    response = s.post(SERVER_URL + '/api/image')
-    response.json() # Just confirm that it's valid JSON
-    observed = eval(observed_str)
-
-    if expected != observed:
-        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
-        all_ok = False
+    login(s, "radler", "radler_password")
+    all_ok = all_ok and test(
+        'POST /api/image empty',
+        f's.post({endpoint_str}).status_code',
+        400,
+    )
     
     # This should succeed. The file should appear in /uploads/.
-    test_name = 'POST /api/image cat'
-    observed_str = 'response.json()'
-    expected = ['api/image/cat.jpg']
-    
-    logger.debug(f'Begin test {test_name}')
+    cat_relative_url = 'api/image/cat.jpg'
     image_file = cat_image_path.open('rb')
-    response = s.post(SERVER_URL + '/api/image', files={'cat.jpg': image_file})
-    observed = eval(observed_str)
+    all_ok = all_ok and test(
+        'POST /api/image cat',
+        f's.post({endpoint_str}, files={{"cat.jpg": image_file}}).json()',
+        [cat_relative_url],
+    )
 
-    if expected != observed:
-        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
-        all_ok = False
-    
-    test_name = 'GET /api/image cat check upload'
-    image_url = SERVER_URL + '/' + observed[0].lstrip('/')
-    observed_str = f's.get({repr(image_url)}).content'
-    expected_str = 'cat_image_path.open("rb").read()'
+    # Confirm file contents same.
+    cat_url = SERVER_URL + '/' + cat_relative_url
+    all_ok = all_ok and test(
+        'GET /api/image cat check upload',
+        observed_str=f's.get({repr(cat_url)}).content',
+        expected_str='cat_image_path.open("rb").read()',
+    )
 
-    expected = eval(expected_str)
-    observed = eval(observed_str)
-
-    if expected != observed:
-        logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
-        all_ok = False
-    
     return all_ok
 
 def test_api_image_get_list():

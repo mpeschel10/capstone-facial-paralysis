@@ -63,7 +63,7 @@ export async function POST(request) {
     const token = signUser(row.id, username, row.kind);
     const expireTime = verify(token, process.env.FA_TEST_JWT_SECRET).exp;
     const expireString = new Date(expireTime * 1000).toUTCString();
-    const cookie = `fa-test-session-jwt=${token}; Expires ${expireString}; Secure; HttpOnly`;
+    const cookie = `fa-test-session-jwt=${token}; Expires ${expireString}; Secure; HttpOnly; Path=/`;
     
     return response200JSON(token, {"Set-Cookie": cookie});
 }
