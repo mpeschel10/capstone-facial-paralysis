@@ -3,12 +3,21 @@ import argon2 from "argon2";
 import { signUser } from "@/lib/kjwt";
 import { pool } from "@/lib/database";
 import { parseRequest } from "@/lib/kmulter";
+import { response200JSON } from "@/lib/responses";
+import { verify } from "jsonwebtoken";
 
 export const dynamic = true;
 
 const failureResponse = new Response(
     null, { status: 500, }
 );
+
+function makeLoginCookie(user_id, username, kind) {
+    const token = signUser(user_id, username, kind);
+    const expireTime = verify(token, process.env.FA_TEST_JWT_SECRET).exp;
+    const expireString = new Date(expireTime * 1000).toUTCString();
+    return `fa-test-session-jwt=${token}; Expires ${expireString}; Secure; HttpOnly; Path=/`;
+}
 
 export async function GET(request) {
     console.debug('GET /api/user', request.url);
@@ -31,8 +40,10 @@ export async function POST(request) {
         const query_parameters = [username, hash, kind];
         try {
             const [rows, _] = await pool.promise().execute(query, query_parameters);
-            const token = signUser(rows.insertId, username, kind);
-            response = Response.json(token, {status: 200});
+            return response200JSON(
+                {user_id: rows.insertId, username, kind},
+                {"Set-Cookie": makeLoginCookie(rows.insertId, username, kind)}
+            );
         } catch (error) {
             if (error.code === "ER_DUP_ENTRY") {
                 const responseBody = `Error: Duplicate username\r\nThe username "${username}" is already taken.\r\nPlease choose another.`;
@@ -52,7 +63,7 @@ export async function POST(request) {
             `kind: ${kind}`
         ];
         response = Response.json(messageParts.join("\n"), {status: 400});
-}
+    }
     
     console.debug('Respond', response.status, Object.fromEntries(response.headers));
     return response;

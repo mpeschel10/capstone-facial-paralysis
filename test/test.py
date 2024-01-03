@@ -145,6 +145,7 @@ def test(test_name, observed_str, expected=None, expected_str=None, comparison=e
             logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
         else:
             logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
+        return False
 
     return True
 
@@ -152,9 +153,9 @@ def test(test_name, observed_str, expected=None, expected_str=None, comparison=e
 def test_api_user():
     all_ok = True
     s = requests.Session()
+    endpoint_str = repr(SERVER_URL + '/api/user')
     
-    test_name = 'GET /api/user'
-    observed_str = 'response.json()'
+
     expected = [
         {'id': 1, 'username': 'mpeschel', 'kind': 'ADMIN', 'clinician_id': None},
         {'id': 2, 'username': 'jcarson', 'kind': 'ADMIN', 'clinician_id': None},
@@ -165,54 +166,52 @@ def test_api_user():
         {'id': 5, 'username': 'radler', 'kind': 'USER', 'clinician_id': 4},
         {'id': 6, 'username': 'rculling', 'kind': 'USER', 'clinician_id': None},
     ]
+    all_ok = all_ok and test(
+        'GET /api/user',
+        f's.get({endpoint_str}).json()',
+        expected,
+    )
     
-    logger.debug(f'Begin test {test_name}')
-    response = s.get(SERVER_URL + '/api/user')
-    observed = eval(observed_str)
 
-    if expected != observed:
-        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == \n{expected} but got \n{observed}.')
-        all_ok = False
-    
-    test_name = 'POST /api/user'
-    
-    # We expect a JWT (JSON Web Token) which is three b64 strings joined with periods.
+    user_data = {
+        'username': 'lwimmel',
+        'password': 'lwimmel_password',
+        'kind': 'USER',
+    }
+    # On POST /api/user, we expect a JWT (JSON Web Token) which is three b64 strings joined with periods.
     # The first string is metadata for the token (algorithm I guess).
-    # The seconds string is what we actually check. Get it by splitting on periods.
+    # The second string is the payload which we actually check. Get it by splitting on periods.
     # The third string is the salted hash, which the server uses as a signature.
 
     # We decode the second string from b64, then from json to get a dict.
     # Along with some other stuff, the dict should have our username and id.
-    observed_str = 'jwt_to_dict(response.json())'
-    expected = { 'user_id':7, 'username':'lwimmel' }
-    
-    logger.debug(f'Begin test {test_name}')
-    response = s.post(SERVER_URL + '/api/user', data={
-        'username': 'lwimmel',
-        'password': 'lwimmel_password',
-        'kind': 'USER',
-    })
-    observed = eval(observed_str)
+    all_ok = all_ok and test(
+        'POST /api/user',
+        f'jwt_to_dict(s.post({endpoint_str}, data=user_data).cookies.get("fa-test-session-jwt"))',
+        { 'user_id':7, 'username':'lwimmel', 'kind':'USER' },
+        comparison=subseteq,
+    )
 
-    if not subseteq(expected, observed):
-        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
-        all_ok = False
     
-    test_name = 'POST /api/user duplicate'
-    observed_str = 'response.json()'
-    expected = 'Error: Duplicate username\r\nThe username "lwimmel" is already taken.\r\nPlease choose another.'
+    all_ok = all_ok and test(
+        'POST /api/user duplicate',
+        f's.post({endpoint_str}, data=user_data).status_code',
+        409,
+    )
     
-    logger.debug(f'Begin test {test_name}')
-    response = s.post(SERVER_URL + '/api/user', data={
-        'username': 'lwimmel',
-        'password': 'lwimmel_password',
-        'kind': 'USER',
-    })
-    observed = eval(observed_str)
 
-    if expected != observed:
-        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
-        all_ok = False
+    user_data = {
+        'username': 'kmellowar',
+        'password': 'kmellowar_password',
+        'kind': 'USER',
+    }
+    # Note that the user_id increments to 9 despite the failed duplicate insertion of user 8.
+    # Failed insertions have side effects on AUTO_INCREMENT I guess.
+    all_ok = all_ok and test(
+        'POST /api/user check json',
+        f's.post({endpoint_str}, data=user_data).json()',
+        { 'user_id':9, 'username':'kmellowar', 'kind':'USER' },
+    )
     
     return all_ok
 
@@ -449,13 +448,16 @@ def main(test_methods=None):
     for test_method in test_methods:
         try:
             result = test_method()
+            all_ok = all_ok and result
             if result:
                 logger.info(f'Test method {test_method.__name__} OK')
-            all_ok = all_ok and result
+            else:
+                break
         except Exception as e:
             logger.error(f'Failure on test method {test_method.__name__}: Got exception {e}')
             print(traceback.format_exc())
             all_ok = False
+            break
 
     logger.debug('End of main.')
     logger.info('All tests finished; %s', 'all OK' if all_ok else 'some errors')
