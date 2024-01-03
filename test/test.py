@@ -156,6 +156,23 @@ def test_api_user():
     endpoint_str = repr(SERVER_URL + '/api/user')
     
 
+    logout(s)
+    all_ok = all_ok and test(
+        'GET /api/user unauthenticated',
+        f's.get({endpoint_str}).status_code',
+        401,
+    )
+    
+    
+    login(s, "rculling", "rculling_password")
+    all_ok = all_ok and test(
+        'GET /api/user user permissions',
+        f's.get({endpoint_str}).status_code',
+        403,
+    )
+    
+
+    login(s, "jcarson", "jcarson_password")
     expected = [
         {'id': 1, 'username': 'mpeschel', 'kind': 'ADMIN', 'clinician_id': None},
         {'id': 2, 'username': 'jcarson', 'kind': 'ADMIN', 'clinician_id': None},
@@ -167,7 +184,7 @@ def test_api_user():
         {'id': 6, 'username': 'rculling', 'kind': 'USER', 'clinician_id': None},
     ]
     all_ok = all_ok and test(
-        'GET /api/user',
+        'GET /api/user admin permissions',
         f's.get({endpoint_str}).json()',
         expected,
     )

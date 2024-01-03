@@ -9,12 +9,15 @@ export const dynamic = true;
 
 export async function GET(request) {
     console.debug("GET /api/user", request.url);
+    const [errorResponse, payload] = requestToPayload(request);
+    if (errorResponse !== null) return errorResponse;
+    if (payload.kind !== "ADMIN") return response403Forbidden(
+        `User ${payload.username} is not allowed to see a complete list of users.\r\n`,
+        "At the moment, there is no API endpoint for seeing your current user information.",
+    );
     
     const [rows, fields] = await pool.promise().query("SELECT id, username, kind, clinician_id FROM user LEFT OUTER JOIN patient ON user.id = patient.patient_id");
-    const response = Response.json(rows);
-    
-    console.debug("Respond", response.status, Object.fromEntries(response.headers));
-    return response;
+    return response200JSON(rows);
 }
 
 export async function POST(request) {
