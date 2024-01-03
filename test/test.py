@@ -171,25 +171,36 @@ def test_api_user():
         f's.get({endpoint_str}).json()',
         expected,
     )
-    
 
+    
+    logout(s)
     user_data = {
         'username': 'lwimmel',
         'password': 'lwimmel_password',
         'kind': 'USER',
     }
-    # On POST /api/user, we expect a JWT (JSON Web Token) which is three b64 strings joined with periods.
-    # The first string is metadata for the token (algorithm I guess).
-    # The second string is the payload which we actually check. Get it by splitting on periods.
-    # The third string is the salted hash, which the server uses as a signature.
-
-    # We decode the second string from b64, then from json to get a dict.
-    # Along with some other stuff, the dict should have our username and id.
     all_ok = all_ok and test(
-        'POST /api/user',
-        f'jwt_to_dict(s.post({endpoint_str}, data=user_data).cookies.get("fa-test-session-jwt"))',
+        'POST /api/user unauthenticated',
+        f's.post({endpoint_str}, data=user_data).status_code',
+        401,
+    )
+
+    
+    login(s, 'radler', 'radler_password')
+    # Normal users are forbidden from creating more users.
+    all_ok = all_ok and test(
+        'POST /api/user user permissions',
+        f's.post({endpoint_str}, data=user_data).status_code',
+        403,
+    )
+    
+    
+    login(s, 'jmiranda', 'jmiranda_password')
+    # Admins can create anything.
+    all_ok = all_ok and test(
+        'POST /api/user admin permissions',
+        f's.post({endpoint_str}, data=user_data).json()',
         { 'user_id':7, 'username':'lwimmel', 'kind':'USER' },
-        comparison=subseteq,
     )
 
     
@@ -197,20 +208,6 @@ def test_api_user():
         'POST /api/user duplicate',
         f's.post({endpoint_str}, data=user_data).status_code',
         409,
-    )
-    
-
-    user_data = {
-        'username': 'kmellowar',
-        'password': 'kmellowar_password',
-        'kind': 'USER',
-    }
-    # Note that the user_id increments to 9 despite the failed duplicate insertion of user 8.
-    # Failed insertions have side effects on AUTO_INCREMENT I guess.
-    all_ok = all_ok and test(
-        'POST /api/user check json',
-        f's.post({endpoint_str}, data=user_data).json()',
-        { 'user_id':9, 'username':'kmellowar', 'kind':'USER' },
     )
     
     return all_ok
