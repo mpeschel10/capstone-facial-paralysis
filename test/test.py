@@ -250,13 +250,6 @@ def test_api_login():
         'password': 'mpeschel_password'
     })
     expected_token_contents = { 'user_id':1, 'username':'mpeschel' }
-    all_ok = all_ok and test(
-        'POST /api/login creds in body',
-        f'jwt_to_dict(s.post({url_str}, data={credentials_str}).json())',
-        expected_token_contents,
-        comparison=subseteq
-    )
-
     def is_cookie_ok(expected, observed):
         segments = observed.split('; ')
         if len(segments) != 5: return False
@@ -289,9 +282,8 @@ def test_api_login():
         if secure != 'Secure' or http_only != 'HttpOnly': return False
 
         return True
-
     all_ok = all_ok and test(
-        'POST /api/login set-cookie',
+        'POST /api/login credts in body',
         f's.post({url_str}, data={credentials_str}).headers["Set-Cookie"]',
         'fa-test-session-jwt={hexadecimal stuff}; Expires sometime; Secure; HttpOnly; Path=/',
         comparison=is_cookie_ok
@@ -301,8 +293,8 @@ def test_api_login():
     credentials_str = repr(('jcarson', 'jcarson_password'))
     all_ok = all_ok and test(
         'POST /api/login creds in Auth header',
-        f'jwt_to_dict(s.post({url_str}, auth={credentials_str}).json())',
-        { 'user_id':2, 'username':'jcarson' },
+        f'jwt_to_dict(s.post({url_str}, auth={credentials_str}).cookies.get("fa-test-session-jwt"))',
+        { 'user_id':2, 'username':'jcarson', 'kind':'ADMIN' },
         comparison=subseteq
     )
     

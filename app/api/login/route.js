@@ -1,16 +1,12 @@
 import argon2 from "argon2";
 
-import { ERROR_RESPONSE } from "@/constants";
-
-import { signUser } from "@/lib/kjwt";
 import { parseRequest } from "@/lib/kmulter";
 import {
-    response200JSON, response400Custom, response400MissingParameter,
+    response200Login, response400Custom, response400MissingParameter,
     response401BadAuthorization, response401WrongPassword
 } from "@/lib/responses";
 import { pool } from "@/lib/database";
 import { chompLeft } from "@/lib/utils";
-import { verify } from "jsonwebtoken";
 
 async function requestToUsernamePassword(request) {
     const authorizationHeader = request.headers.get("Authorization");
@@ -59,11 +55,5 @@ export async function POST(request) {
     const expectedHash = row.password;
     if (!await argon2.verify(expectedHash, password)) return response401WrongPassword({ username });
     
-    
-    const token = signUser(row.id, username, row.kind);
-    const expireTime = verify(token, process.env.FA_TEST_JWT_SECRET).exp;
-    const expireString = new Date(expireTime * 1000).toUTCString();
-    const cookie = `fa-test-session-jwt=${token}; Expires ${expireString}; Secure; HttpOnly; Path=/`;
-    
-    return response200JSON(token, {"Set-Cookie": cookie});
+    return response200Login(row.id, username, row.kind);
 }
