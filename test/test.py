@@ -9,17 +9,13 @@ from requests.adapters import HTTPAdapter, Retry
 
 
 
-PORT = 3000
-SERVER_URL = 'http://127.0.0.1:%d' % PORT
-
+from test_lib import SERVER_URL
 
 
 import shutil
 from pathlib import Path
-def get_repo_dir():
-    return Path(subprocess.check_output(['git', 'rev-parse', '--show-toplevel']).decode('utf-8').strip())
 
-repo_dir = get_repo_dir()
+from test_lib import repo_dir
 uploads_dir = repo_dir.joinpath('uploads')
 badger_upload_path = uploads_dir.joinpath('badger.jpg')
 beaver_upload_path = uploads_dir.joinpath('beaver.jpg')
@@ -28,12 +24,8 @@ owl_upload_path = uploads_dir.joinpath('owl.jpg')
 
 db_reset_path = repo_dir.joinpath('facial-analytics.sql')
 
-test_dir = repo_dir.joinpath('test')
-cat_image_path = test_dir.joinpath('resources', 'cat.jpg')
-badger_image_path = test_dir.joinpath('resources', 'badger.jpg')
-beaver_image_path = test_dir.joinpath('resources', 'beaver.jpg')
-dog_image_path = test_dir.joinpath('resources', 'dog.jpg')
-owl_image_path = test_dir.joinpath('resources', 'owl.jpg')
+from test_lib import test_dir
+from test_lib import cat_image_path, badger_image_path, beaver_image_path, dog_image_path, owl_image_path
 
 db_test_data_path = test_dir.joinpath('resources', 'test.sql')
 server_pid_path = test_dir.joinpath('run', 'server_pid')
@@ -90,25 +82,7 @@ def reset_db():
     apply_sql(db_test_data_path)
     logger.info('Reset database OK')
 
-
-def login(session, username, password):
-    session.post(SERVER_URL + '/api/login', data={
-        'username': username,
-        'password': password,
-    })
-    
-    # For production, the cookies have the HttpOnly attribute, which forbids passing the cookies over Http.
-    # For testing, it's all done over http since I don't wanna bother with self-signed certificates.
-    # This means the jwt cookie will not get passed along,
-    #  so reassign the cookie to discard the HttpOnly attribute.
-    token = session.cookies.get('fa-test-session-jwt', domain='127.0.0.1', path='/')
-    # Discard the old cookie. This must be done as a separate step.
-    session.cookies.set('fa-test-session-jwt', None, domain='127.0.0.1', path='/')
-    session.cookies.set('fa-test-session-jwt', token, domain='127.0.0.1', path='/')
-
-def logout(session):
-    session.cookies.set('fa-test-session-jwt', None, domain='127.0.0.1', path='/')
-
+from test_lib import login, logout
 def await_server():
     # From https://stackoverflow.com/a/35504626
     # Begin copyrighted material
@@ -379,65 +353,13 @@ def test_api_image_get_list():
 
     return all_ok
 
-def test_file_visibility():
-    all_ok = True
-    s = requests.Session()
-    
-    test_name = 'GET /api/image unauthenticated'
-    observed_str = 's.get(f"{SERVER_URL}/api/image/badger.jpg").status_code'
-    expected = 401
-    
-    logger.debug(f'Begin test {test_name}')
-    observed = eval(observed_str)
-
-    if expected != observed:
-        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
-        all_ok = False
-    
-    test_name = 'GET /api/image admin auth'
-    observed_str = f's.get("{SERVER_URL}/api/image/owl.jpg").content'
-    expected_str = 'owl_image_path.open("rb").read()'
-    
-    logger.debug(f'Begin test {test_name}')
-    login(s, 'mpeschel', 'mpeschel_password')
-    expected = eval(expected_str)
-    observed = eval(observed_str)
-
-    if expected != observed:
-        logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
-        all_ok = False
-    
-    test_name = 'GET /api/image owner auth'
-    observed_str = f's.get("{SERVER_URL}/api/image/beaver.jpg").content'
-    expected_str = 'beaver_image_path.open("rb").read()'
-    
-    logger.debug(f'Begin test {test_name}')
-    login(s, 'rculling', 'rculling_password')
-    expected = eval(expected_str)
-    observed = eval(observed_str)
-
-    if expected != observed:
-        logger.warning(f'Failure on test {test_name}: {observed_str} != {expected_str}')
-        all_ok = False
-    
-    test_name = 'GET /api/image unauthorized'
-    observed_str = f's.get("{SERVER_URL}/api/image/dog.jpg").status_code'
-    expected = 403
-    
-    logger.debug(f'Begin test {test_name}')
-    observed = eval(observed_str)
-
-    if expected != observed:
-        logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
-        all_ok = False
-    
-    return all_ok
+from test_api import test_file_visibility
 
 def main(test_methods=None):
     '''Performs tests on the facial-analytics server. Prints failures to console.
 
-    Assumes the server is up and running at port %d.
-    ''' % PORT
+    Assumes the server is up and running at url %s.
+    ''' % SERVER_URL
 
     if test_methods == None:
         def __f(): pass
