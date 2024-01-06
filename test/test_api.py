@@ -1,4 +1,4 @@
-import base64, json
+import base64, datetime, json
 import logging
 logger = logging.getLogger('test')
 
@@ -110,3 +110,202 @@ def test_api_image_get_list():
     all_ok = all_ok and test('GET /api/image unauthorized', 's.get(SERVER_URL + "/api/image").status_code', 401)
 
     return all_ok
+
+def test_api_image():
+    from test_lib import cat_image_path
+    all_ok = True
+    s = requests.Session()
+    endpoint_str = repr(SERVER_URL + '/api/image')
+    
+    # This should fail because it has no body or anything.
+    login(s, "radler", "radler_password")
+    all_ok = all_ok and test(
+        'POST /api/image empty',
+        f's.post({endpoint_str}).status_code',
+        400,
+    )
+    
+    # This should succeed. The file should appear in /uploads/.
+    cat_relative_url = 'api/image/cat.jpg'
+    image_file = cat_image_path.open('rb')
+    all_ok = all_ok and test(
+        'POST /api/image cat',
+        f's.post({endpoint_str}, files={{"cat.jpg": image_file}}).json()',
+        [cat_relative_url],
+    )
+
+    # Confirm file contents same.
+    cat_url = SERVER_URL + '/' + cat_relative_url
+    all_ok = all_ok and test(
+        'GET /api/image cat check upload',
+        observed_str=f's.get({repr(cat_url)}).content',
+        expected_str='cat_image_path.open("rb").read()',
+    )
+
+    return all_ok
+
+def test_api_login():
+    from test_lib import subseteq
+    all_ok = True
+    s = requests.Session()
+    url_str = repr(SERVER_URL + "/api/login")
+
+    all_ok = all_ok and test(
+        'POST /api/login no parameters',
+        f's.post({url_str}).status_code',
+        400,
+    )
+
+    
+    all_ok = all_ok and test(
+        'POST /api/login missing parameter',
+        f's.post({url_str}, data={{"username": "mpeschel"}}).status_code',
+        400,
+    )
+
+    
+    credentials_str = repr({
+        'username': 'mpeschel',
+        'password': 'x'
+    })
+    all_ok = all_ok and test(
+        'POST /api/login wrong password',
+        f's.post({url_str}, data={credentials_str}).status_code',
+        401,
+    )
+    
+    
+    credentials_str = repr({
+        'username': 'mpeschel',
+        'password': 'mpeschel_password'
+    })
+    expected_token_contents = { 'user_id':1, 'username':'mpeschel' }
+    def is_cookie_ok(expected, observed):
+        segments = observed.split('; ')
+        if len(segments) != 5: return False
+        key_value = segments[0]
+        expires_when, secure, http_only, path = None, None, None, None
+        for segment in segments[1:]:
+            if segment.startswith('Expires '):
+                expires_when = segment
+            elif segment == 'Secure':
+                secure = segment
+            elif segment == 'HttpOnly':
+                http_only = segment
+            elif segment == 'Path=/':
+                path = segment
+            else:
+                return False
+
+        key, value = key_value.split('=', 1)
+        if key != 'fa-test-session-jwt': return False
+        if not subseteq(expected_token_contents, jwt_to_dict(value)): return False
+
+        when = chomp_left(expires_when, 'Expires ')
+        try:
+            datetime.datetime.strptime(when, '%a, %d %b %Y %H:%M:%S GMT')
+        except ValueError:
+            logging.warn(f'Rejecting cookie {observed} due to time formatting error.')
+            return False
+
+        if secure != 'Secure': secure, http_only = http_only, secure
+        if secure != 'Secure' or http_only != 'HttpOnly': return False
+
+        return True
+    all_ok = all_ok and test(
+        'POST /api/login credts in body',
+        f's.post({url_str}, data={credentials_str}).headers["Set-Cookie"]',
+        'fa-test-session-jwt={hexadecimal stuff}; Expires sometime; Secure; HttpOnly; Path=/',
+        comparison=is_cookie_ok
+    )
+
+    
+    credentials_str = repr(('jcarson', 'jcarson_password'))
+    all_ok = all_ok and test(
+        'POST /api/login creds in Auth header',
+        f'jwt_to_dict(s.post({url_str}, auth={credentials_str}).cookies.get("fa-test-session-jwt"))',
+        { 'user_id':2, 'username':'jcarson', 'kind':'ADMIN' },
+        comparison=subseteq
+    )
+    
+    return all_ok
+
+def test_api_user():
+    all_ok = True
+    s = requests.Session()
+    endpoint_str = repr(SERVER_URL + '/api/user')
+    
+
+    logout(s)
+    all_ok = all_ok and test(
+        'GET /api/user unauthenticated',
+        f's.get({endpoint_str}).status_code',
+        401,
+    )
+    
+    
+    login(s, "rculling", "rculling_password")
+    all_ok = all_ok and test(
+        'GET /api/user user permissions',
+        f's.get({endpoint_str}).status_code',
+        403,
+    )
+    
+
+    login(s, "jcarson", "jcarson_password")
+    expected = [
+        {'id': 1, 'username': 'mpeschel', 'kind': 'ADMIN', 'clinician_id': None},
+        {'id': 2, 'username': 'jcarson', 'kind': 'ADMIN', 'clinician_id': None},
+        {'id': 3, 'username': 'jmiranda', 'kind': 'ADMIN', 'clinician_id': None},
+        
+        {'id': 4, 'username': 'ghouse', 'kind': 'ADMIN', 'clinician_id': None},
+        
+        {'id': 5, 'username': 'radler', 'kind': 'USER', 'clinician_id': 4},
+        {'id': 6, 'username': 'rculling', 'kind': 'USER', 'clinician_id': None},
+    ]
+    all_ok = all_ok and test(
+        'GET /api/user admin permissions',
+        f's.get({endpoint_str}).json()',
+        expected,
+    )
+
+    
+    logout(s)
+    user_data = {
+        'username': 'lwimmel',
+        'password': 'lwimmel_password',
+        'kind': 'USER',
+    }
+    all_ok = all_ok and test(
+        'POST /api/user unauthenticated',
+        f's.post({endpoint_str}, data=user_data).status_code',
+        401,
+    )
+
+    
+    login(s, 'radler', 'radler_password')
+    # Normal users are forbidden from creating more users.
+    all_ok = all_ok and test(
+        'POST /api/user user permissions',
+        f's.post({endpoint_str}, data=user_data).status_code',
+        403,
+    )
+    
+    
+    login(s, 'jmiranda', 'jmiranda_password')
+    # Admins can create anything.
+    all_ok = all_ok and test(
+        'POST /api/user admin permissions',
+        f's.post({endpoint_str}, data=user_data).json()',
+        { 'user_id':7, 'username':'lwimmel', 'kind':'USER' },
+    )
+
+    
+    all_ok = all_ok and test(
+        'POST /api/user duplicate',
+        f's.post({endpoint_str}, data=user_data).status_code',
+        409,
+    )
+    
+    return all_ok
+
