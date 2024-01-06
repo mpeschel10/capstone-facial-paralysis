@@ -1,13 +1,30 @@
+import base64, json
 import logging
 logger = logging.getLogger('test')
 
 import requests
 
-from test_lib import cat_image_path, badger_image_path, beaver_image_path, dog_image_path, owl_image_path
 from test_lib import SERVER_URL
 from test_lib import login, logout
+from test_lib import reset_db, reset_uploads
+from test_lib import test
+
+
+def urlsafe_b64decode_padded(s):
+    return base64.urlsafe_b64decode(s + "=" * ((4 - len(s)) % 4))
+
+def jwt_to_dict(jwt):
+    json_str = urlsafe_b64decode_padded(jwt.split(".")[1])
+    return json.loads(json_str)
+
+def chomp_left(s, prefix):
+    if not s.startswith(prefix): return None
+    return s[len(prefix):]
+
+
 
 def test_file_visibility():
+    from test_lib import owl_image_path, beaver_image_path
     all_ok = True
     s = requests.Session()
     
@@ -59,4 +76,37 @@ def test_file_visibility():
         logger.warning(f'Failure on test {test_name}: Expected {observed_str} == {expected} but got {observed}.')
         all_ok = False
     
+    return all_ok
+
+def test_api_image_get_list():
+    reset_uploads()
+    reset_db()
+
+    all_ok = True
+    s = requests.Session()
+
+    login(s, "mpeschel", "mpeschel_password") # cat badger beaver dog owl
+    all_ok = all_ok and test(
+        'GET /api/image admin',
+        's.get(SERVER_URL + "/api/image").json()',
+        [{'id': 1, 'url': '/api/image/badger.jpg'}, {'id': 2, 'url': '/api/image/beaver.jpg'}, {'id': 3, 'url': '/api/image/dog.jpg'}, {'id': 4, 'url': '/api/image/owl.jpg'}]
+    )
+    
+    login(s, "rculling", "rculling_password") # beaver owl
+    all_ok = all_ok and test(
+        'GET /api/image rculling beaver owl',
+        's.get(SERVER_URL + "/api/image").json()',
+        [{'id': 2, 'url': '/api/image/beaver.jpg'}, {'id': 4, 'url': '/api/image/owl.jpg'}]
+    )
+    
+    login(s, "radler", "radler_password") # dog owl
+    all_ok = all_ok and test(
+        'GET /api/image radler dog owl',
+        's.get(SERVER_URL + "/api/image").json()',
+        [{'id': 3, 'url': '/api/image/dog.jpg'}, {'id': 4, 'url': '/api/image/owl.jpg'}]
+    )
+    
+    logout(s) # 401 Unauthorized
+    all_ok = all_ok and test('GET /api/image unauthorized', 's.get(SERVER_URL + "/api/image").status_code', 401)
+
     return all_ok
