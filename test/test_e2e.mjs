@@ -6,7 +6,7 @@ const readline = readlinePackage.createInterface({
 
 import { Builder, By } from "selenium-webdriver";
 
-// Utility I use while writing my code. 
+// Utility I use while writing tests. 
 function fetchEnter() { return new Promise(resolve => {
         readline.question("Press enter key to continue.", resolve);
     })
