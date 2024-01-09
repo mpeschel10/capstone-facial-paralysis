@@ -2,7 +2,7 @@ import argon2 from "argon2";
 
 import { parseRequest } from "@/lib/kmulter";
 import {
-    response200Login, response400Custom, response400MissingParameter,
+    response303Login, response400Custom, response400MissingParameter,
     response401BadAuthorization, response401WrongPassword
 } from "@/lib/responses";
 import { pool } from "@/lib/database";
@@ -55,5 +55,5 @@ export async function POST(request) {
     const expectedHash = row.password;
     if (!await argon2.verify(expectedHash, password)) return response401WrongPassword({ username });
     
-    return response200Login(row.id, username, row.kind);
+    return response303Login(row.id, username, row.kind);
 }

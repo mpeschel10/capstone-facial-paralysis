@@ -1,4 +1,5 @@
 import base64, datetime, json
+from urllib.parse import urlparse
 import logging
 logger = logging.getLogger('test')
 
@@ -183,17 +184,18 @@ def test_api_login():
     def is_cookie_ok(expected, observed):
         segments = observed.split('; ')
         if len(segments) != 5: return False
-        key_value = segments[0]
-        expires_when, secure, http_only, path = None, None, None, None
-        for segment in segments[1:]:
-            if segment.startswith('Expires '):
+        
+        segment_set = {s for s in segments}
+        for segment in ['Secure', 'HttpOnly', 'Path=/']:
+            if not segment in segment_set:
+                return False
+            segment_set.discard(segment)
+        
+        for segment in segment_set:
+            if '=' in segment:
+                key_value = segment
+            elif segment.startswith('Expires '):
                 expires_when = segment
-            elif segment == 'Secure':
-                secure = segment
-            elif segment == 'HttpOnly':
-                http_only = segment
-            elif segment == 'Path=/':
-                path = segment
             else:
                 return False
 
@@ -208,13 +210,10 @@ def test_api_login():
             logging.warn(f'Rejecting cookie {observed} due to time formatting error.')
             return False
 
-        if secure != 'Secure': secure, http_only = http_only, secure
-        if secure != 'Secure' or http_only != 'HttpOnly': return False
-
         return True
     all_ok = all_ok and test(
-        'POST /api/login credts in body',
-        f's.post({url_str}, data={credentials_str}).headers["Set-Cookie"]',
+        'POST /api/login creds in body',
+        f's.post({url_str}, data={credentials_str}, allow_redirects=False).headers["Set-Cookie"]',
         'fa-test-session-jwt={hexadecimal stuff}; Expires sometime; Secure; HttpOnly; Path=/',
         comparison=is_cookie_ok
     )
@@ -222,12 +221,18 @@ def test_api_login():
     
     credentials_str = repr(('jcarson', 'jcarson_password'))
     all_ok = all_ok and test(
-        'POST /api/login creds in Auth header',
-        f'jwt_to_dict(s.post({url_str}, auth={credentials_str}).cookies.get("fa-test-session-jwt"))',
-        { 'user_id':2, 'username':'jcarson', 'kind':'ADMIN' },
-        comparison=subseteq
+        'POST /api/login redirect to admin page',
+        f'urlparse(s.post({url_str}, auth={credentials_str}).url).path',
+        '/dashboard',
     )
     
+    
+    credentials_str = repr(('rculling', 'rculling_password'))
+    all_ok = all_ok and test(
+        'POST /api/login redirect to user page',
+        f'urlparse(s.post({url_str}, auth={credentials_str}).url).path',
+        '/home',
+    )
     return all_ok
 
 def test_api_user():
