@@ -43,7 +43,7 @@ export async function getDriver() {
 
 export async function close() {
     if (driver !== null) {
-        logging.debug("Closing driver...");
+        console.debug("Closing driver...");
         await driver.quit();
         driver = null;
     }

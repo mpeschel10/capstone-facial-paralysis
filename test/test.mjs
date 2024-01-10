@@ -4,6 +4,19 @@ import { testPostApiLoginJson } from "./test_unit.mjs";
 import * as test_e2e from "./test_e2e.mjs";
 const { testE2eLogin } = test_e2e;
 
+
+const parser = {
+    namespace: {},
+    actions: {},
+
+    parse_args() {
+        for (const argument of process.argv)
+            if (this.actions[argument] !== undefined)
+            this.actions[argument]();
+        return this.namespace;
+    }
+}
+
 async function untilServerUp() {
     const endpoint = "http://127.0.0.1:3000";
 
@@ -21,20 +34,41 @@ async function untilServerUp() {
         }
     }
 }
-
 async function main() {
     child_process.exec("test/ensure_server_up.sh");
-    await untilServerUp();
     
-    // Start up the server
-    console.info("Start of tests.");
+    parser.namespace.headless = false;
+    parser.actions["--headless"] = () => { parser.namespace.headless = true; };
+    
+    parser.namespace.full = false;
+    parser.actions["--full"] = () => { parser.namespace.full = true; };
+    
+    parser.namespace.quiet = false;
+    parser.actions["--quiet"] = () => { parser.namespace.quiet = true; };
+    
+    const args = parser.parse_args();
+    // console.log("Raw arguments: ", process.argv);
+    // console.log("Parsed arguments: ", args);
 
-    const testMethods = [
+    test_e2e.open({headless: args.headless});
+
+    let testMethods = [
         testPostApiLoginJson,
         testE2eLogin,
+        // testE2eUpload,
     ];
+    if (!args.full) testMethods = [ testE2eLogin ];
 
+    if (args.quiet) {
+        console.debug = () => {};
+        console.log = () => {};
+    }
+
+    // TODO: Something about launching the driver and the server simultaneously, then await Promise.all. Faster.
+    // TODO: Use an actual selenium framework or selenium server or whatever.
+    await untilServerUp();
     try {
+        console.info("Start of tests.");
         for (const testMethod of testMethods) {
             console.debug("Begin test method", testMethod.name);
             const ok = await testMethod();
@@ -53,62 +87,4 @@ async function main() {
 }
 
 main();
-
-
-const parser = {
-    namespace: {},
-    actions: {},
-
-    parse_args() {
-        for (const argument of process.argv)
-            if (this.actions[argument] !== undefined)
-            this.actions[argument]();
-        return this.namespace;
-    }
-}
-
-
-async function main2() {
-    parser.namespace.headless = false;
-    parser.actions["--headless"] = () => { parser.namespace.headless = true; };
-    
-    parser.namespace.full = false;
-    parser.actions["--full"] = () => { parser.namespace.full = true; };
-    
-    parser.namespace.quiet = false;
-    parser.actions["--quiet"] = () => { parser.namespace.quiet = true; };
-    
-    const args = parser.parse_args();
-    // console.log("Raw arguments: ", process.argv);
-    // console.log("Parsed arguments: ", args);
-    
-    if (args.quiet) {
-        console.debug = () => {};
-        console.log = () => {};
-    }
-
-    try {
-        let tests = [
-            testE2eLogin,
-            testE2eUpload,
-        ];
-        
-        if (!args.full) {
-            tests = [ testE2eLogin ];
-        }
-        
-        for (const testMethod of tests) {
-            console.debug("Begin test method", testMethod.name);
-            const ok = await testMethod();
-            if (ok) {
-                console.info("Test method OK", testMethod.name);
-            } else {
-                console.error("Test method ERROR", testMethod.name);
-            }
-        }
-    } finally {
-    }
-    
-    process.exit();
-}
 
