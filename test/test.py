@@ -96,7 +96,7 @@ if __name__ == '__main__':
     if args.make_server:
         # Launch the server in a new window, for neatness.
         # launch_server.sh will server the PID in a test/run/server_pid so we can kill it later.
-        p = subprocess.Popen(['gnome-terminal', '--', test_dir.joinpath('launch_server.sh')])
+        p = subprocess.Popen(['gnome-terminal', '--', test_dir.joinpath('run_server.sh')])
     else:
         p = None
 

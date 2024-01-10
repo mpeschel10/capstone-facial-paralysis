@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev-mark": ". secrets/secrets.env; systemctl is-active --quiet mariadb || sudo systemctl start mariadb; next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test-e2e": "node test/test_e2e.mjs"
+    "test-e2e": "node test/test_e2e.mjs",
+    "test": "node test/test.mjs"
   },
   "dependencies": {
     "argon2": "^0.31.2",

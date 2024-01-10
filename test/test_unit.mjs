@@ -22,11 +22,13 @@ export async function testPostApiLoginJson() {
         const jwt = await result.json();
         const payloadString = decode(jwt.split(".")[1]).toString("utf-8");
         const payload = JSON.parse(payloadString);
+        console.debug("Got payload as user", payload.username);
         
-        return payload.username === "jmiranda" && payload.user_id === 3 && payload.kind === "KIND";
+        return payload.username === "jmiranda" && payload.user_id === 3 && payload.kind === "ADMIN";
     } catch (error) {
-        // Error may be thrown if credentials are bad.
-        console.error(error);
+        // Error may be thrown if server is not up.
+        console.error("Error:", error);
     }
+    return false;
     
 }
