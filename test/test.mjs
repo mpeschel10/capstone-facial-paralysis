@@ -1,6 +1,6 @@
 import child_process from "node:child_process";
 
-import { testPostApiLoginJson } from "./test_unit.mjs";
+import { testPostApiLoginJson, testOld, } from "./test_unit.mjs";
 import * as test_e2e from "./test_e2e.mjs";
 const { testE2eLogin } = test_e2e;
 
@@ -55,9 +55,10 @@ async function main() {
     let testMethods = [
         testPostApiLoginJson,
         testE2eLogin,
+        testOld,
         // testE2eUpload,
     ];
-    if (!args.full) testMethods = [ testE2eLogin ];
+    if (!args.full) testMethods = [ testOld ];
 
     if (args.quiet) {
         console.debug = () => {};

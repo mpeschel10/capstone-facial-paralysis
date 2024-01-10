@@ -13,6 +13,7 @@ import logging
 logger = logging.getLogger('test')
 
 
+import sys
 from test_api import chomp_left, jwt_to_dict
 
 from test_lib import reset_db, reset_uploads
@@ -41,11 +42,15 @@ def await_server():
 
 from test_api import test_api_login, test_api_user, test_file_visibility, test_api_image_get_list, test_api_image
 
+exit_code = 0
+
 def main(test_methods=None):
     '''Performs tests on the facial-analytics server. Prints failures to console.
 
     Assumes the server is up and running at url %s.
     ''' % SERVER_URL
+
+    global exit_code
 
     if test_methods == None:
         def __f(): pass
@@ -75,6 +80,7 @@ def main(test_methods=None):
 
     logger.debug('End of main.')
     logger.info('All tests finished; %s', 'all OK' if all_ok else 'some errors')
+    exit_code = 0 if all_ok else 2
 
 
 
@@ -104,10 +110,11 @@ if __name__ == '__main__':
         await_server()
         main(None)
     except BaseException as e:
-        # print('Exception:', e)
-        raise e
+        print('Exception:', e)
+        exit_code = 3
     finally:
         if not p is None and not args.keep_server:
             time.sleep(2) # If there's an immediate exception, launch_server.sh will not write pid in time.
             server_pid = int(server_pid_path.open().read())
             os.kill(server_pid, signal.SIGTERM)
+        sys.exit(exit_code)

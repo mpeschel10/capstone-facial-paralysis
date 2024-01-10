@@ -1,3 +1,5 @@
+import child_process from "node:child_process";
+
 const SERVER_URL = "http://127.0.0.1:3000";
 import { decode } from "urlsafe-base64";
 
@@ -31,4 +33,15 @@ export async function testPostApiLoginJson() {
     }
     return false;
     
+}
+
+export async function testOld() {
+    const result = await new Promise(
+        resolve => child_process.exec("python test/test.py", (error, stdout, stderr) => resolve([error, stdout, stderr]))
+    );
+    const [error, stdout, stderr] = result;
+    console.log(stdout);
+    console.log(stderr);
+    
+    return error === null;
 }
