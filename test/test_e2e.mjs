@@ -20,20 +20,34 @@ const screen = {
 };
 
 let driver = null;
-function getDriver({headless}) {
-    let driverPromise = new Builder().forBrowser("firefox");
+let driverPromise = null;
+export async function open({headless}) {
+    console.debug("Setting driver options:", {headless});
+    driverPromise = new Builder().forBrowser("firefox");
     if (headless) {
         driverPromise = driverPromise
             .setFirefoxOptions(new firefox.Options().headless().windowSize(screen));
     }
-    console.info("Getting driver...");
-    return driverPromise.build();
 }
 
-async function login(driver, username, password) {
-    // TODO
+export async function getDriver() {
+    if (driver === null) {
+        if (driverPromise === null) {
+            open({headless:false});
+        }
+        console.info("Getting driver...");
+        driver = await driverPromise.build();
+    }
+    return driver;
 }
 
+export async function close() {
+    if (driver !== null) {
+        logging.debug("Closing driver...");
+        await driver.quit();
+        driver = null;
+    }
+}
 
 // Utility I use while writing tests. 
 function fetchEnter() { return new Promise(resolve => {
@@ -41,21 +55,12 @@ function fetchEnter() { return new Promise(resolve => {
     })
 }
 
-const parser = {
-    namespace: {},
-    actions: {},
-
-    parse_args() {
-        for (const argument of process.argv)
-            if (this.actions[argument] !== undefined)
-            this.actions[argument]();
-        return this.namespace;
-    }
-}
 
 
 
-async function testE2eLogin() {
+export async function testE2eLogin() {
+    const driver = await getDriver();
+
     const endpoint = SERVER_URL + "/login";
     console.debug("Get", endpoint);
     await driver.get(endpoint);
@@ -81,7 +86,8 @@ async function testE2eLogin() {
     return ok;
 }
 
-async function testE2eUpload() {
+export async function testE2eUpload() {
+    const driver = await getDriver();
     await login(driver, "mpeschel", "mpeschel_password");
     
     const endpoint = SERVER_URL + "/home";
@@ -111,52 +117,3 @@ async function testE2eUpload() {
     // Then you click on each of them and you do the picture.
     return true;
 }
-
-async function main() {
-    parser.namespace.headless = false;
-    parser.actions["--headless"] = () => { parser.namespace.headless = true; };
-    
-    parser.namespace.full = false;
-    parser.actions["--full"] = () => { parser.namespace.full = true; };
-    
-    parser.namespace.quiet = false;
-    parser.actions["--quiet"] = () => { parser.namespace.quiet = true; };
-    
-    const args = parser.parse_args();
-    // console.log("Raw arguments: ", process.argv);
-    // console.log("Parsed arguments: ", args);
-    
-    if (args.quiet) {
-        console.debug = () => {};
-        console.log = () => {};
-    }
-
-    driver = await getDriver(args);
-    
-    try {
-        let tests = [
-            testE2eLogin,
-            testE2eUpload,
-        ];
-        
-        if (!args.full) {
-            tests = [ testE2eLogin ];
-        }
-        
-        for (const testMethod of tests) {
-            console.debug("Begin test method", testMethod.name);
-            const ok = await testMethod();
-            if (ok) {
-                console.info("Test method OK", testMethod.name);
-            } else {
-                console.error("Test method ERROR", testMethod.name);
-            }
-        }
-    } finally {
-        await driver.quit();
-    }
-    
-    process.exit();
-}
-
-main();
