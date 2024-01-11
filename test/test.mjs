@@ -1,6 +1,6 @@
 import child_process from "node:child_process";
 
-import { testPostApiLoginJson, testOld, } from "./test_unit.mjs";
+import { testPostApiLoginJson, testOld, testGetApiImage } from "./test_unit.mjs";
 import * as test_e2e from "./test_e2e.mjs";
 const { testE2eLogin } = test_e2e;
 
@@ -56,9 +56,10 @@ async function main() {
         testPostApiLoginJson,
         testE2eLogin,
         testOld,
+        testGetApiImage,
         // testE2eUpload,
     ];
-    if (!args.full) testMethods = [ testOld ];
+    if (!args.full) testMethods = [ testGetApiImage ];
 
     if (args.quiet) {
         console.debug = () => {};
@@ -68,20 +69,34 @@ async function main() {
     // TODO: Something about launching the driver and the server simultaneously, then await Promise.all. Faster.
     // TODO: Use an actual selenium framework or selenium server or whatever.
     await untilServerUp();
+    let allOk = true;
     try {
         console.info("Start of tests.");
         for (const testMethod of testMethods) {
             console.debug("Begin test method", testMethod.name);
-            const ok = await testMethod();
-            if (ok) {
-                console.info("Test method OK", testMethod.name);
-            } else {
+            try {
+                allOk = allOk && await testMethod();
+                if(allOk) {
+                    console.info("Test method OK", testMethod.name);
+                } else {
+                    console.error("Test method ERROR", testMethod.name);
+                    break;
+                }
+            } catch(error) {
+                allOk = false;
                 console.error("Test method ERROR", testMethod.name);
+                console.error(error);
                 break;
             }
         }
     } finally {
         await test_e2e.close();
+    }
+
+    if(allOk) {
+        console.info("Tests complete OK");
+    } else {
+        console.error("Tests complete some ERRORS");
     }
 
     process.exit();
