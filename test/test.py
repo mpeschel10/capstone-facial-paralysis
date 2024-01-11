@@ -40,7 +40,7 @@ def await_server():
     s.get(SERVER_URL)
     logger.info('Server ready.')
 
-from test_api import test_api_login, test_api_user, test_file_visibility, test_api_image_get_list, test_api_image
+from test_api import test_api_login, test_api_user, test_file_visibility, test_api_image
 
 exit_code = 0
 
