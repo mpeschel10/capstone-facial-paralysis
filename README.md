@@ -35,3 +35,4 @@ Fourth, it will eventually link up with a machine learning platform that will au
 ## To-do list and other coordination
 
 #### [Facial Analytics Checklist](https://pennstateoffice365-my.sharepoint.com/:x:/g/personal/msp5393_psu_edu/EZh5t_dYPsNFq0JaZCNACAEB13Uo0YzhOKBRcONIOyd8cw?e=JBWeEK)
+#### [Mobile App Repository](https://github.com/jxm1348/Capstone-Facial-Paralysis-Mobile-App)
