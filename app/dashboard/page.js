@@ -1,3 +1,5 @@
+import PatientTable from "@/components/patient_table.js";
+
 export default function Dashboard() {
     return (<div>
         <h3>Dashboard for cliniciains</h3>
@@ -22,6 +24,7 @@ export default function Dashboard() {
         <br></br>
 
         <h4>Browse all patients (that table I mentioned)</h4>
+        <PatientTable />
         <h4>Browse all messages, image requests etc</h4>
         <br></br>
 

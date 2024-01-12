@@ -2,7 +2,7 @@ import child_process from "node:child_process";
 
 import { testPostApiLoginJson, testOld, testGetApiImage } from "./test_unit.mjs";
 import * as test_e2e from "./test_e2e.mjs";
-const { testE2eLogin } = test_e2e;
+const { testE2eLogin, testE2eUpload, testE2eViewExistingImage } = test_e2e;
 
 
 const parser = {
@@ -54,12 +54,14 @@ async function main() {
 
     let testMethods = [
         testPostApiLoginJson,
-        testE2eLogin,
         testOld,
         testGetApiImage,
+        
+        testE2eLogin,
+        testE2eViewExistingImage,
         // testE2eUpload,
     ];
-    if (!args.full) testMethods = [ testGetApiImage ];
+    if (!args.full) testMethods = [ testE2eViewExistingImage ];
 
     if (args.quiet) {
         console.debug = () => {};

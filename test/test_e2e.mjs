@@ -55,6 +55,14 @@ function fetchEnter() { return new Promise(resolve => {
     })
 }
 
+async function login(driver, username, password) {
+    const endpoint = SERVER_URL + "/login";
+    console.debug(`Logging in ${username} identified by ${password}`);
+    await driver.get(endpoint);
+    await driver.findElement(By.id("text-username")).sendKeys(username);
+    await driver.findElement(By.id("password-password")).sendKeys(password);
+    await driver.findElement(By.id("submit-login")).click();
+}
 
 
 
@@ -84,6 +92,14 @@ export async function testE2eLogin() {
     const ok = pathname === "/dashboard"; // Admin home page
     console.debug("Was redirected to path", pathname, ok ? "OK" : "Error: expected /dashboard but got " + pathname);
     return ok;
+}
+
+export async function testE2eViewExistingImage() {
+    const driver = await getDriver();
+    await login(driver, "ghouse", "ghouse_password");
+    console.warn("TODO implement admin browsing images");
+    await fetchEnter();
+    return false;
 }
 
 export async function testE2eUpload() {
