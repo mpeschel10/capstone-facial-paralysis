@@ -24,9 +24,9 @@ Fourth, it will eventually link up with a machine learning platform that will au
 #### [Database Design](https://drive.google.com/file/d/1EI9w-PoYzTP_i9AJYBGYWvi-uNHV-ZL-/view)
 
 #### [Domain Model](https://drive.google.com/file/d/1CX_ORTxK9FsXk-Tg8izZSY5mT3a4EZe7/view)
-<!-- TODO-->
-#### Revised Use Case Diagram
-<!-- TODO-->
+
+#### [Use Case Diagram](https://drive.google.com/file/d/1AnI4uiMBwyy5A9Y5e8ODEz1mqSg9A1hw/view)
+
 #### Revised Use Case Text for important Use Cases
 
 <!-- TODO Revise GUI-->
