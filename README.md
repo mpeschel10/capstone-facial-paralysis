@@ -19,11 +19,19 @@ Fourth, it will eventually link up with a machine learning platform that will au
 
 ## Documentation
 
-#### [Requirements document](https://pennstateoffice365-my.sharepoint.com/:w:/r/personal/msp5393_psu_edu/Documents/Para-analytics%20project%20requirements.docx?d=w178034557e944a4a9e3671cada04d65f&csf=1&web=1&e=Be7gxR)
+#### [High level requirements](https://pennstateoffice365-my.sharepoint.com/:w:/g/personal/msp5393_psu_edu/EVU0gBeUfkpKnjZxytoE1l8BLoWNbVO5uDRFVc7x0O3YPw)
 
 #### [Database Design](https://drive.google.com/file/d/1EI9w-PoYzTP_i9AJYBGYWvi-uNHV-ZL-/view)
 
-#### [Graphic User Interface](https://pennstateoffice365-my.sharepoint.com/:f:/g/personal/msp5393_psu_edu/EnSBCh98AnxDvs3oXbzyhRABkQssKdBKvlBVmINSSue5Yg?e=I2gDvD)
+<!-- TODO-->
+#### Revised Domain Model
+<!-- TODO-->
+#### Revised Use Case Diagram
+<!-- TODO-->
+#### Revised Use Case Text for important Use Cases
+
+<!-- TODO Revise GUI-->
+#### [GUI Prototype/Storyboard](https://pennstateoffice365-my.sharepoint.com/:f:/g/personal/msp5393_psu_edu/EnSBCh98AnxDvs3oXbzyhRABkQssKdBKvlBVmINSSue5Yg?e=I2gDvD)
 
 ## To-do list and other coordination
 
