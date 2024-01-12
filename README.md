@@ -23,8 +23,7 @@ Fourth, it will eventually link up with a machine learning platform that will au
 
 #### [Database Design](https://drive.google.com/file/d/1EI9w-PoYzTP_i9AJYBGYWvi-uNHV-ZL-/view)
 
-<!-- TODO-->
-#### Revised Domain Model
+#### [Domain Model](https://drive.google.com/file/d/1CX_ORTxK9FsXk-Tg8izZSY5mT3a4EZe7/view)
 <!-- TODO-->
 #### Revised Use Case Diagram
 <!-- TODO-->
