@@ -27,7 +27,7 @@ Fourth, it will eventually link up with a machine learning platform that will au
 
 #### [Use Case Diagram](https://drive.google.com/file/d/1AnI4uiMBwyy5A9Y5e8ODEz1mqSg9A1hw/view)
 
-#### Revised Use Case Text for important Use Cases
+#### [Use Case Texts](https://pennstateoffice365-my.sharepoint.com/:w:/g/personal/msp5393_psu_edu/EVelXHCvjg5EvWKXS1mq6bUBiL-OjuirglWUA8vu7arOGQ)
 
 <!-- TODO Revise GUI-->
 #### [GUI Prototype/Storyboard](https://pennstateoffice365-my.sharepoint.com/:f:/g/personal/msp5393_psu_edu/EnSBCh98AnxDvs3oXbzyhRABkQssKdBKvlBVmINSSue5Yg?e=I2gDvD)
