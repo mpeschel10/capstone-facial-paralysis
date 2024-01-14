@@ -19,12 +19,24 @@ Fourth, it will eventually link up with a machine learning platform that will au
 
 ## Documentation
 
-#### [Requirements document](https://pennstateoffice365-my.sharepoint.com/:w:/r/personal/msp5393_psu_edu/Documents/Para-analytics%20project%20requirements.docx?d=w178034557e944a4a9e3671cada04d65f&csf=1&web=1&e=Be7gxR)
+#### [High level requirements](https://pennstateoffice365-my.sharepoint.com/:w:/g/personal/msp5393_psu_edu/EVU0gBeUfkpKnjZxytoE1l8BLoWNbVO5uDRFVc7x0O3YPw)
 
 #### [Database Design](https://drive.google.com/file/d/1EI9w-PoYzTP_i9AJYBGYWvi-uNHV-ZL-/view)
 
-#### [Graphic User Interface](https://pennstateoffice365-my.sharepoint.com/:f:/g/personal/msp5393_psu_edu/EnSBCh98AnxDvs3oXbzyhRABkQssKdBKvlBVmINSSue5Yg?e=I2gDvD)
+#### [Domain Model](https://drive.google.com/file/d/1CX_ORTxK9FsXk-Tg8izZSY5mT3a4EZe7/view)
+
+#### [Use Case Diagram](https://drive.google.com/file/d/1AnI4uiMBwyy5A9Y5e8ODEz1mqSg9A1hw/view)
+
+#### [Use Case Texts](https://pennstateoffice365-my.sharepoint.com/:w:/g/personal/msp5393_psu_edu/EVelXHCvjg5EvWKXS1mq6bUBiL-OjuirglWUA8vu7arOGQ)
+
+
+### GUI mockups
+#### [Patient Home Page](https://drive.google.com/file/d/1jHxOmagBA9gvN7j0aeyVZUyZbgv3Xk59/view)
+#### [Patient Create Report Page](https://drive.google.com/file/d/18hsAbos79KHM39r5vH9XXSej_u8Zj9mA/view)
+#### [Patient Selfie Camera](https://drive.google.com/file/d/1pW1Z15qM6H06mlzMzXzueFi25vHZ-dhG/view)
+#### [Clinician View Reports](https://drive.google.com/file/d/1AETmj-viyM2TtNj5Bf8W1gONdDVS0624/view)
 
 ## To-do list and other coordination
 
 #### [Facial Analytics Checklist](https://pennstateoffice365-my.sharepoint.com/:x:/g/personal/msp5393_psu_edu/EZh5t_dYPsNFq0JaZCNACAEB13Uo0YzhOKBRcONIOyd8cw?e=JBWeEK)
+#### [Mobile App Repository](https://github.com/jxm1348/Capstone-Facial-Paralysis-Mobile-App)
