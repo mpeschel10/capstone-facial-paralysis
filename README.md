@@ -29,8 +29,12 @@ Fourth, it will eventually link up with a machine learning platform that will au
 
 #### [Use Case Texts](https://pennstateoffice365-my.sharepoint.com/:w:/g/personal/msp5393_psu_edu/EVelXHCvjg5EvWKXS1mq6bUBiL-OjuirglWUA8vu7arOGQ)
 
-<!-- TODO Revise GUI-->
-#### [GUI Prototype/Storyboard](https://pennstateoffice365-my.sharepoint.com/:f:/g/personal/msp5393_psu_edu/EnSBCh98AnxDvs3oXbzyhRABkQssKdBKvlBVmINSSue5Yg?e=I2gDvD)
+
+### GUI mockups
+#### [Patient Home Page](https://drive.google.com/file/d/1jHxOmagBA9gvN7j0aeyVZUyZbgv3Xk59/view)
+#### [Patient Create Report Page](https://drive.google.com/file/d/18hsAbos79KHM39r5vH9XXSej_u8Zj9mA/view)
+#### [Patient Selfie Camera](https://drive.google.com/file/d/1pW1Z15qM6H06mlzMzXzueFi25vHZ-dhG/view)
+#### [Clinician View Reports](https://drive.google.com/file/d/1AETmj-viyM2TtNj5Bf8W1gONdDVS0624/view)
 
 ## To-do list and other coordination
 
