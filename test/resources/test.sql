@@ -2,6 +2,7 @@ INSERT INTO user
     (username, password, kind)
 VALUES
     -- Note: For testing purposes, all passwords are of the form `${username}_password`
+    -- Example hashes were made with the command `echo -n "password" | npx argon2-cli -e`
     ('mpeschel', '$argon2i$v=19$m=4096,t=3,p=1$NHw/0ZeoRZO5GwggL21mgg$+oXcnUw4TMxLAT6rPTlC3oiAWkD0Co64g/ZEUB4B/eQ', 'ADMIN'), -- 1
     ('jcarson', '$argon2i$v=19$m=4096,t=3,p=1$u6r+MEs7iQLedI1yCxyRVw$pTXhegqH2h6h+SizPv2g+XX88P+rzI/L0uEO4/bV4u0', 'ADMIN'), -- 2
     ('jmiranda', '$argon2i$v=19$m=4096,t=3,p=1$HFnkzewbwRniD1URIht5Pg$g/1yi0iLc7Hnn27iruEsk23YCyrPr96D1IU0cMUFwMA', 'ADMIN'), -- 3
