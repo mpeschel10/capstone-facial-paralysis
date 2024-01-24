@@ -58,7 +58,7 @@ async function main() {
         testGetApiImage,
         
         testE2eLogin,
-        testE2eViewExistingImage,
+        // testE2eViewExistingImage,
         // testE2eUpload,
     ];
     if (!args.full) testMethods = [ testE2eViewExistingImage ];
