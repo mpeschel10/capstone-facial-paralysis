@@ -17,14 +17,20 @@ function liveExec(program, args) {
 }
 
 const commands = [
-    ['ssh', [REMOTE, 'echo "Yes, I think"'], 'Sanity check. Are we logged in?'],
-    ['ssh', [REMOTE, 'apt-get update'], 'Get list of packages to upgrade.'],
-    ['ssh', [REMOTE, 'apt-get upgrade -y'], 'Blindly upgrade everything. Hope nothing breaks...'],
-    ['ssh', [REMOTE, 'mkdir', '-p', '/opt/fa-test/']],
-    // ['ssh', [REMOTE, 'cd /opt/fa-test && git init']],
+    // ['ssh', [REMOTE, 'echo "Yes, I think"'], 'Sanity check. Are we logged in?'],
+    // ['ssh', [REMOTE, 'apt-get update'], 'Get list of packages to upgrade.'],
+    // ['ssh', [REMOTE, 'apt-get upgrade -y'], 'Blindly upgrade everything. Hope nothing breaks...'],
+    
     // ['git', ['remote', 'add', 'test', REMOTE_TEST]],
-    ['git', ['remote', 'set-url', 'test', REMOTE_TEST]],
+    // ['git', ['remote', 'set-url', 'test', REMOTE_TEST]],
+    
+    // ['ssh', [REMOTE, 'mkdir', '-p', '/opt/fa-test/']],
+    // ['ssh', [REMOTE, 'cd /opt/fa-test && git init']],
+    // ['git', ['push', 'test', 'main']],
+    // ['ssh', [REMOTE, 'cd /opt/fa-test && git checkout -b production']],
+
     ['git', ['push', 'test', 'main']],
+    ['ssh', [REMOTE, 'cd /opt/fa-test && git merge main']],
 ];
 
 for (const [program, args, description] of commands) {
