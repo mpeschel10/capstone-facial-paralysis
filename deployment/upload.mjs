@@ -28,9 +28,16 @@ const commands = [
     // ['ssh', [REMOTE, 'cd /opt/fa-test && git init']],
     // ['git', ['push', 'test', 'main']],
     // ['ssh', [REMOTE, 'cd /opt/fa-test && git checkout -b production']],
+    
+    ['ssh', [REMOTE, 'cd /etc/systemd/system && ln -s /opt/fa-test/deployment/fa-test-server.service']],
+    ['ssh', [REMOTE, 'systemctl daemon-reload']],
+    ['ssh', [REMOTE, 'systemctl enable --now fa-test-server']],
 
-    ['git', ['push', 'test', 'main']],
-    ['ssh', [REMOTE, 'cd /opt/fa-test && git merge main']],
+    // ['git', ['push', 'test', 'main']],
+    // ['ssh', [REMOTE, 'cd /opt/fa-test && git merge main']],
+    ['ssh', [REMOTE, 'cd /opt/fa-test && npm i']],
+    ['ssh', [REMOTE, 'cd /opt/fa-test && npm run build']],
+    ['ssh', [REMOTE, 'systemctl restart fa-test-server']],
 ];
 
 for (const [program, args, description] of commands) {
