@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test-e2e": "node test/test_e2e.mjs",
-    "test": "node test/test.mjs"
+    "test": "node test/test.mjs",
+    "upload": "node deployment/upload.mjs"
   },
   "dependencies": {
     "argon2": "^0.31.2",
